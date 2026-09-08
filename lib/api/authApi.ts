@@ -1,7 +1,23 @@
 import { AuthApiResponse, LoginPayload } from "@/lib/types/authType";
+import { isMockEnabled, mockDelay } from "@/lib/utils/mock";
+import { mockLoginResponse } from "@/lib/mocks/authMock";
 
 // Login Guru (Teacher) menggunakan Username & Password
 export const loginApi = async (payload: LoginPayload): Promise<AuthApiResponse> => {
+  if (isMockEnabled()) {
+    await mockDelay();
+    if (!payload.username || !payload.password) {
+      return {
+        code: 400,
+        status: "error",
+        message: "Username dan password wajib diisi (data dummy)",
+        data: null,
+        access_token: "",
+      };
+    }
+    return mockLoginResponse;
+  }
+
   try {
     const formData = new FormData();
     formData.append("username", payload.username);

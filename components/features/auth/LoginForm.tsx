@@ -2,11 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { CiUser } from "react-icons/ci";
-import { AppDispatch, RootState } from "@/redux/store";
+import { AppDispatch } from "@/redux/store";
 import { login, clearAuthMessage } from "@/redux/features/auth/authSlice";
 import { TEACHER_DASHBOARD_PATH } from "@/lib/constants/role";
+import useAuth from "@/hook/useAuth";
 import TextInput from "@/components/ui/Input/TextInput";
 import PasswordInput from "@/components/ui/Input/PasswordInput";
 import PrimaryButton from "@/components/ui/Button/PrimaryButton";
@@ -21,7 +22,7 @@ function LoginForm() {
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector((state: RootState) => state.auth);
+  const { loading } = useAuth();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -31,10 +32,10 @@ function LoginForm() {
     const result = await dispatch(login({ username, password }));
 
     if (login.fulfilled.match(result)) {
-      const { code, data, message } = result.payload;
+      const { code, data, message, access_token } = result.payload;
 
       if (code === 200 && data) {
-        localStorage.setItem("access_token", data.uuid);
+        localStorage.setItem("access_token", access_token);
         setShowSuccess(true);
         setTimeout(() => {
           router.push(TEACHER_DASHBOARD_PATH);

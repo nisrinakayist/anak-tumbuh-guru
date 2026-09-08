@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import LoginForm from "@/components/features/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Login | ANAKTUMBUH.ID Guru",
+  title: "Login | ANAKTUMBUH.ID Wali Kelas",
   description: "Sistem Pemantauan 7 Kebiasaan Anak Indonesia Hebat",
 };
 
@@ -13,11 +13,11 @@ const Page = () => {
         <section className="rounded-[2.5rem] border border-white bg-white p-6 shadow-[0_24px_60px_rgba(164,193,253,0.42)] sm:p-8">
           <div className="text-center">
             <h1 className="text-2xl font-black tracking-tight text-primary-900 sm:text-3xl">
-              ANAKTUMBUH.ID
+              anaktumbuh.id
             </h1>
-            <p className="mt-1 text-sm font-bold text-primary-900/75">Masuk sebagai Guru</p>
+            <p className="mt-1 text-sm font-bold text-primary-900/75">Masuk sebagai Wali Kelas</p>
             <p className="mx-auto mt-2 max-w-sm text-xs font-semibold leading-5 text-primary-900/55">
-              Gunakan username dan password akun Guru untuk melanjutkan.
+              Gunakan username dan password akun Wali Kelas untuk melanjutkan.
             </p>
           </div>
 
