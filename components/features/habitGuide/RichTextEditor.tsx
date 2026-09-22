@@ -7,6 +7,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 import { useEffect } from "react";
 import EditorToolbar from "@/components/features/habitGuide/EditorToolbar";
+import ImageNode from "@/components/features/habitGuide/ImageNode";
 
 type RichTextEditorProps = {
   value: string;
@@ -25,6 +26,7 @@ function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       Underline,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Link.configure({ openOnClick: false, autolink: true }),
+      ImageNode,
     ],
     content: value,
     immediatelyRender: false,

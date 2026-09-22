@@ -11,7 +11,14 @@ function ImageButton({ editor }: ImageButtonProps) {
   const handleClick = () => {
     const url = window.prompt("Masukkan URL gambar:");
     if (!url) return;
-    editor.chain().focus().setImage({ src: url }).run();
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: "image",
+        attrs: { src: url },
+      })
+      .run();
   };
 
   return (
