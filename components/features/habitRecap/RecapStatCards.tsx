@@ -12,7 +12,7 @@ type RecapStatCardsProps = {
 // lewat HABIT_ICON_REGISTRY supaya data ringkasan tetap aman disimpan di Redux.
 export default function RecapStatCards({ summary }: RecapStatCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
       {summary.map((metric) => (
         <RecapStatCard
           key={metric.key}

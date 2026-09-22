@@ -38,26 +38,27 @@ export default function RecapStatCard({
   const toneClass = TONE_CLASS[tone];
 
   return (
-    <div className="rounded-2xl border border-primary-100 bg-white p-4 shadow-sm sm:p-5">
+    <div className="min-w-0 rounded-2xl border border-primary-100 bg-white p-3 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-2">
-        <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${toneClass.box}`}>
-          <Icon size={20} />
+        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl sm:h-10 sm:w-10 ${toneClass.box}`}>
+          <Icon size={18} className="sm:hidden" />
+          <Icon size={20} className="hidden sm:block" />
         </span>
         <StatusBadge label={badge.label} tone={badge.tone} />
       </div>
 
-      <p className="mt-4 text-[10px] font-black uppercase tracking-[0.14em] text-primary-900/50">{label}</p>
+      <p className="mt-3 text-[9px] font-black sm:mt-4 sm:text-[10px] uppercase tracking-[0.14em] text-primary-900/50">{label}</p>
 
-      <p className="mt-1 flex flex-wrap items-baseline gap-x-1.5 text-3xl font-black text-primary-900">
+      <p className="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-1 text-2xl font-black sm:gap-x-1.5 sm:text-3xl text-primary-900">
         {value}
         {suffix && (
-          <span className={`text-xs font-bold ${suffixTone === "accent" ? toneClass.accent : "text-primary-900/45"}`}>
+          <span className={`text-[10px] font-bold sm:text-xs ${suffixTone === "accent" ? toneClass.accent : "text-primary-900/45"}`}>
             {suffix}
           </span>
         )}
       </p>
 
-      <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-primary-900/55">
+      <p className="mt-2 flex items-start gap-1 text-[9px] font-semibold leading-tight sm:gap-1.5 sm:text-[11px] text-primary-900/55">
         {FooterIcon ? (
           <FooterIcon size={13} className={`shrink-0 ${toneClass.accent}`} />
         ) : (
