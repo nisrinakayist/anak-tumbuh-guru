@@ -1,16 +1,25 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS } from "@/lib/constants/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { NAV_ITEMS, isNavGroup } from "@/lib/constants/navigation";
+import SidebarRoleCard from "@/components/common/Sidebar/SidebarRoleCard";
+import SidebarLink from "@/components/common/Sidebar/SidebarLink";
+import SidebarGroup from "@/components/common/Sidebar/SidebarGroup";
 
 type SidebarProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+
+  // Nama rombel diambil dari data yang sudah dimuat halaman aktif (kalau ada)
+  const rombelName = useSelector(
+    (state: RootState) => state.classroom.classGroup?.name ?? state.habitRecap.data?.class_group.name
+  );
 
   return (
     <>
@@ -24,12 +33,12 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-primary-900 shadow-xl transition-transform duration-300 lg:z-30 lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col overflow-y-auto bg-primary-900 shadow-xl transition-transform duration-300 lg:z-30 lg:translate-x-0 lg:shadow-none ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-[72px] items-center gap-3 border-b border-white/10 px-5">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary-500 text-primary-900 font-black">
+        <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-white/10 px-5">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary-500 font-black text-primary-900">
             AT
           </span>
           <span className="text-lg font-black tracking-tight text-white">
@@ -37,37 +46,25 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           </span>
         </div>
 
-        <div className="mx-4 mt-5 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-white/10">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
-            Workspace
-          </p>
-          <p className="mt-1 text-sm font-extrabold text-white">Wali Kelas</p>
-        </div>
+        <SidebarRoleCard roleLabel={rombelName ? `Wali Kelas ${rombelName}` : "Wali Kelas"} />
 
-        <nav className="mt-6 flex-1 space-y-1.5 px-3">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            return (
-              <Link
+        <nav className="mt-6 flex-1 space-y-1.5 px-3 pb-6">
+          {NAV_ITEMS.map((item) =>
+            isNavGroup(item) ? (
+              <SidebarGroup key={item.label} item={item} pathname={pathname} onNavigate={onClose} />
+            ) : (
+              <SidebarLink
                 key={item.href}
+                label={item.label}
                 href={item.href}
-                onClick={onClose}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition ${
-                  isActive
-                    ? "bg-white text-primary-900 shadow-sm"
-                    : "text-white/75 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <Icon size={20} />
-                <span className="truncate">{item.label}</span>
-              </Link>
-            );
-          })}
+                icon={item.icon}
+                isActive={pathname === item.href}
+                onNavigate={onClose}
+              />
+            )
+          )}
         </nav>
       </aside>
     </>
   );
 }
-
-export default Sidebar;

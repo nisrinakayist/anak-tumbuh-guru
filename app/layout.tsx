@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { Urbanist } from "next/font/google";
+
 import "./globals.css";
 import ReduxProvider from "@/redux/provider";
 
-const urbanist = Urbanist({
-  subsets: ["latin"],
-  variable: "--font-urbanist",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "ANAKTUMBUH.ID | Wali Kelas",
@@ -21,7 +16,7 @@ type RootLayoutProps = Readonly<{
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="id">
-      <body className={`${urbanist.className} antialiased`}>
+      <body className={`antialiased`}>
         <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>

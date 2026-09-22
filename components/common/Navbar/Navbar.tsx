@@ -17,7 +17,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
         <button
           type="button"
           onClick={onOpenSidebar}
-          className="rounded-xl border border-primary-100 p-2 text-primary-900 lg:hidden"
+          className="hidden rounded-xl border border-primary-100 p-2 text-primary-900 lg:hidden"
           aria-label="Buka navigasi"
         >
           <CiMenuBurger size={20} />

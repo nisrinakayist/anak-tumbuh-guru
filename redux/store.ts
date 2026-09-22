@@ -4,6 +4,8 @@ import classroomSlice from "./features/classroom/classroomSlice";
 import studentSlice from "./features/students/studentSlice";
 import reportSlice from "./features/report/reportSlice";
 import studentAccountSlice from "./features/studentAccount/studentAccountSlice";
+import habitGuideSlice from "./features/habitGuide/habitGuideSlice";
+import habitRecapSlice from "./features/habitRecap/habitRecapSlice";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const store = configureStore({
     student: studentSlice,
     report: reportSlice,
     studentAccount: studentAccountSlice,
+    habitGuide: habitGuideSlice,
+    habitRecap: habitRecapSlice,
   },
 });
 

@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import Sidebar from "@/components/common/Sidebar/Sidebar";
 import Navbar from "@/components/common/Navbar/Navbar";
 import Breadcrumb from "@/components/common/Breadcrumb/Breadcrumb";
+import BottomNav from "@/components/common/BottomNav/BottomNav";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -19,7 +20,8 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="min-h-screen lg:pl-[248px]">
         <Navbar onOpenSidebar={() => setIsSidebarOpen(true)} />
         <Breadcrumb />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="p-3 pb-28 sm:p-6 sm:pb-28 lg:p-8 lg:pb-8">{children}</main>
+        <BottomNav />
       </div>
     </div>
   );
