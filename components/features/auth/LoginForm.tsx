@@ -15,7 +15,7 @@ import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
 import SuccessModal from "@/components/ui/Modal/SuccessModal";
 
 function LoginForm() {
-  const [username, setUsername] = useState("");
+  const [nip, setNip] = useState("");
   const [password, setPassword] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -29,7 +29,9 @@ function LoginForm() {
     setFormError(null);
     dispatch(clearAuthMessage());
 
-    const result = await dispatch(login({ username, password }));
+    // Wali Kelas login menggunakan NIP sebagai username.
+    // Password tetap dikirim dari field password dan diisi dengan NIP oleh pengguna.
+    const result = await dispatch(login({ username: nip.trim(), password }));
 
     if (login.fulfilled.match(result)) {
       const { code, data, message, access_token } = result.payload;
@@ -43,7 +45,7 @@ function LoginForm() {
         return;
       }
 
-      setFormError(message || "Username atau password salah.");
+      setFormError(message || "NIP atau password salah.");
       return;
     }
 
@@ -54,15 +56,16 @@ function LoginForm() {
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
       <div className="relative">
         <TextInput
-          label="Username"
-          name="username"
+          label="NIP"
+          name="nip"
           type="text"
-          placeholder="Masukkan username"
+          inputMode="numeric"
+          placeholder="Masukkan NIP Wali Kelas"
           autoComplete="username"
           autoFocus
           required
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
+          value={nip}
+          onChange={(event) => setNip(event.target.value)}
         />
         <CiUser size={22} className="absolute right-4 top-11 text-slate-400" />
       </div>
@@ -70,7 +73,7 @@ function LoginForm() {
       <PasswordInput
         label="Password"
         name="password"
-        placeholder="Masukkan password"
+        placeholder="Masukkan NIP sebagai password"
         autoComplete="current-password"
         required
         value={password}
@@ -79,7 +82,7 @@ function LoginForm() {
 
       {formError && <ErrorAlert message={formError} onClose={() => setFormError(null)} />}
 
-      <PrimaryButton isLoading={loading}>Masuk</PrimaryButton>
+      <PrimaryButton isLoading={loading}>Masuk ke Dashboard</PrimaryButton>
 
       {showSuccess && <SuccessModal message="Berhasil masuk, mengalihkan ke dashboard..." />}
     </form>

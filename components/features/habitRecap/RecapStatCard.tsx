@@ -41,8 +41,7 @@ export default function RecapStatCard({
     <div className="min-w-0 rounded-2xl border border-primary-100 bg-white p-3 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-2">
         <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl sm:h-10 sm:w-10 ${toneClass.box}`}>
-          <Icon size={18} className="sm:hidden" />
-          <Icon size={20} className="hidden sm:block" />
+          <Icon size={20} />
         </span>
         <StatusBadge label={badge.label} tone={badge.tone} />
       </div>

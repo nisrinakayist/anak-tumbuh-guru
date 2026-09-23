@@ -8,7 +8,7 @@ export const mockLoginResponse: AuthApiResponse = {
     id: 1,
     uuid: "mock-teacher-uuid",
     name: "Bu Nisrina",
-    username: "guru1",
+    username: "198901012020012001",
     email: "guru1@anaktumbuh.id",
     role: "teacher",
     school_id: 1,

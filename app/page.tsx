@@ -17,7 +17,7 @@ const Page = () => {
             </h1>
             <p className="mt-1 text-sm font-bold text-primary-900/75">Masuk sebagai Wali Kelas</p>
             <p className="mx-auto mt-2 max-w-sm text-xs font-semibold leading-5 text-primary-900/55">
-              Gunakan username dan password akun Wali Kelas untuk melanjutkan.
+              Gunakan NIP sebagai username dan password akun Wali Kelas untuk melanjutkan.
             </p>
           </div>
 

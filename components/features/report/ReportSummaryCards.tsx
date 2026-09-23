@@ -14,9 +14,12 @@ function ReportSummaryCards({ result }: ReportSummaryCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+    // grid-template-columns dipaksa lewat inline style (bukan cuma class
+    // Tailwind) supaya 3 kolom ini PASTI diterapkan, apa pun kondisi
+    // cache/build Tailwind-nya -- tidak pernah balik ke 1 kolom di mobile.
+    <div className="grid gap-2 sm:gap-4" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
       {cards.map((card) => (
-        <SummaryCard key={card.label} label={card.label} value={card.value} icon={card.icon} />
+        <SummaryCard key={card.label} label={card.label} value={card.value} icon={card.icon} compact />
       ))}
     </div>
   );
