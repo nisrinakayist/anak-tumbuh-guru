@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import ReduxProvider from "@/redux/provider";
+import PwaBootstrap from "@/components/pwa/PwaBootstrap";
 
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="id">
       <body className={`antialiased`}>
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          <PwaBootstrap />
+          {children}
+        </ReduxProvider>
       </body>
     </html>
   );
