@@ -4,24 +4,36 @@ import {
   StudentImportCommitResponse,
   ValidatedStudentImportRow,
 } from "@/lib/types/studentImportType";
+import { mockStudents } from "@/lib/mocks/classroomMock";
 
-export const buildMockAddStudentResponse = (payload: AddStudentPayload): AddStudentResponse => ({
-  code: 200,
-  status: "success",
-  message: `${payload.name} berhasil ditambahkan (data dummy)`,
-  data: {
-    id: 99,
-    uuid: "mock-student-new",
+// Sebelumnya fungsi ini cuma "berpura-pura" berhasil (return data dummy tanpa
+// pernah disimpan ke mana pun), jadi siswa baru tidak pernah muncul di tabel
+// setelah disimpan. Sekarang siswa baru benar-benar di-push ke mockStudents
+// (array yang sama dipakai getMockClassroomDashboard), jadi begitu
+// StudentManagement refetch dashboard, siswa baru langsung kelihatan di tabel.
+export const buildMockAddStudentResponse = (payload: AddStudentPayload): AddStudentResponse => {
+  const newStudent = {
+    id: mockStudents.length + 1,
+    uuid: `mock-student-new-${Date.now()}`,
     name: payload.name,
     nis: payload.nis,
     gender: payload.gender,
-    status: "active",
+    status: "active" as const,
     points: 0,
     level: 1,
-    class_rank: 11,
-    today_status: "not_filled",
-  },
-});
+    class_rank: mockStudents.length + 1,
+    today_status: "not_filled" as const,
+  };
+
+  mockStudents.push(newStudent);
+
+  return {
+    code: 200,
+    status: "success",
+    message: `${payload.name} berhasil ditambahkan (data dummy)`,
+    data: newStudent,
+  };
+};
 
 // Baris ke-3 sengaja dibuat invalid untuk mendemokan tampilan error preview import.
 const mockImportRows: ValidatedStudentImportRow[] = [

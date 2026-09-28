@@ -12,7 +12,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 flex h-[72px] items-center justify-between border-b border-primary-100 bg-white/95 px-4 shadow-sm backdrop-blur sm:px-6">
+    <header className="flex h-[72px] items-center justify-between border-b border-primary-100 bg-white/95 px-4 shadow-sm backdrop-blur sm:px-6">
       <div className="flex items-center gap-3">
         <button
           type="button"

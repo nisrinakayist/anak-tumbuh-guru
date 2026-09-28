@@ -25,14 +25,14 @@ function StudentManagement() {
         </h1>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <div className="rounded-3xl border border-primary-100 bg-white shadow-sm">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="min-w-0 flex-1 rounded-3xl border border-primary-100 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-primary-50 p-4 sm:p-5">
             <h2 className="text-sm font-extrabold text-primary-900">Daftar Siswa</h2>
             <div className="flex items-center gap-2">
               {/* Panel "Tambah Siswa Manual" sudah tampil permanen di kolom kanan
                   pada layar lg ke atas, jadi tombol ini (pembuka popup) cukup
-                  ditampilkan di mobile saja. */}
+                  ditampilkan di mobile saja supaya tidak dobel. */}
               <button
                 type="button"
                 onClick={() => setIsAddOpen(true)}
@@ -66,7 +66,7 @@ function StudentManagement() {
 
         {/* Di mobile panel ini digantikan tombol "Tambah Siswa" + popup di atas,
             supaya tidak menumpuk penuh satu kolom di bawah tabel siswa. */}
-        <div className="hidden rounded-3xl border border-primary-100 bg-white p-5 shadow-sm lg:block">
+        <div className="hidden w-full shrink-0 rounded-3xl border border-primary-100 bg-white p-5 shadow-sm lg:block lg:w-[320px]">
           <h2 className="text-sm font-extrabold text-primary-900">Tambah Siswa Manual</h2>
           <p className="mt-1 text-xs font-semibold text-primary-900/55">
             Siswa langsung masuk ke rombelmu.

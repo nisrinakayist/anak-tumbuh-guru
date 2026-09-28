@@ -1,6 +1,6 @@
 import { ClassroomDashboardResponse } from "@/lib/types/classroomType";
 import { isMockEnabled, mockDelay } from "@/lib/utils/mock";
-import { mockClassroomDashboard } from "@/lib/mocks/classroomMock";
+import { getMockClassroomDashboard } from "@/lib/mocks/classroomMock";
 
 // Ambil data rombel milik Guru yang sedang login beserta ringkasan &
 // daftar siswanya. 1 Teacher = 1 rombel (dokumen bag. 2), jadi tidak
@@ -8,7 +8,7 @@ import { mockClassroomDashboard } from "@/lib/mocks/classroomMock";
 export async function getClassroomDashboardApi(): Promise<ClassroomDashboardResponse> {
   if (isMockEnabled()) {
     await mockDelay();
-    return mockClassroomDashboard;
+    return getMockClassroomDashboard();
   }
 
   try {

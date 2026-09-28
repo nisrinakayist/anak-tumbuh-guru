@@ -2,12 +2,19 @@
  * This worker deliberately does NOT cache API requests.
  * API synchronization will be added after the Laravel contract is final.
  */
-const CACHE_VERSION = "anak-tumbuh-guru-v1";
+const CACHE_VERSION = "anak-tumbuh-guru-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGE_CACHE = `${CACHE_VERSION}-pages`;
 
 const APP_SHELL = [
   "/",
+  "/dashboard",
+  "/dashboard/habit-recap",
+  "/dashboard/habit-recap/wake-up",
+  "/dashboard/students",
+  "/dashboard/students/accounts",
+  "/dashboard/report",
+  "/dashboard/guide",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];
@@ -83,7 +90,9 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match("/")))
+        .catch(() =>
+          caches.match(request).then((cached) => cached || caches.match("/"))
+        )
     );
   }
 });

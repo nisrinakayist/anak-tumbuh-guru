@@ -10,10 +10,36 @@ import {
   mockImportValidationResponse,
   buildMockCommitResponse,
 } from "@/lib/mocks/studentMock";
+import { saveOfflineRecord } from "@/lib/pwa/offline-db";
+
+// Dipakai saat request tidak bisa sampai ke server (offline / koneksi putus).
+// Data disimpan dulu ke IndexedDB, nanti dikirim ulang otomatis oleh
+// lib/pwa/offline-sync.ts begitu koneksi kembali online.
+const queueAddStudentOffline = async (
+  payload: AddStudentPayload,
+  message: string
+): Promise<AddStudentResponse> => {
+  await saveOfflineRecord("add_student", payload);
+  return {
+    code: 202,
+    status: "offline_pending",
+    message,
+    data: null,
+  };
+};
 
 // Tambah siswa manual ke rombel Teacher yang login (dokumen bag. 2:
 // "Teacher diberikan akses langsung untuk menambahkan/menginput data siswa baru")
 export async function addStudentApi(payload: AddStudentPayload): Promise<AddStudentResponse> {
+  // Cek offline duluan (berlaku juga saat mode mock, supaya alur offline
+  // tetap bisa dites sebelum backend beneran siap).
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    return queueAddStudentOffline(
+      payload,
+      "Koneksi offline. Data siswa disimpan sementara di perangkat dan akan otomatis disinkronkan saat online kembali."
+    );
+  }
+
   if (isMockEnabled()) {
     await mockDelay();
     return buildMockAddStudentResponse(payload);
@@ -36,8 +62,13 @@ export async function addStudentApi(payload: AddStudentPayload): Promise<AddStud
     const response = await res.json();
     return response;
   } catch (error) {
+    // fetch gagal total (bukan sekadar respons error) biasanya berarti
+    // koneksi putus di tengah jalan -> antrekan juga sebagai data offline.
     console.log(error);
-    throw error;
+    return queueAddStudentOffline(
+      payload,
+      "Gagal terhubung ke server. Data siswa disimpan sementara di perangkat dan akan otomatis disinkronkan saat online kembali."
+    );
   }
 }
 

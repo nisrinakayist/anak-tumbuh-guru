@@ -10,13 +10,20 @@ import SelectInput from "@/components/ui/Input/SelectInput";
 import PrimaryButton from "@/components/ui/Button/PrimaryButton";
 import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
 
-function AddStudentForm() {
+type AddStudentFormProps = {
+  // Dipanggil setelah siswa BERHASIL tersimpan ke server (code 200), bukan
+  // saat masuk antrean offline (code 202) -- supaya AddStudentModal bisa
+  // menutup dirinya sendiri begitu tabel di belakangnya sudah terupdate.
+  onSuccess?: () => void;
+};
+
+function AddStudentForm({ onSuccess }: AddStudentFormProps) {
   const [name, setName] = useState("");
   const [nis, setNis] = useState("");
   const [gender, setGender] = useState<"L" | "P">("L");
 
   const dispatch = useDispatch<AppDispatch>();
-  const { addLoading, addError, addSuccessMessage } = useSelector(
+  const { addLoading, addError, addSuccessMessage, addOfflineMessage } = useSelector(
     (state: RootState) => state.student
   );
 
@@ -26,11 +33,22 @@ function AddStudentForm() {
 
     const result = await dispatch(addStudent({ name, nis, gender }));
 
-    if (addStudent.fulfilled.match(result) && result.payload.code === 200) {
-      setName("");
-      setNis("");
-      setGender("L");
-      dispatch(fetchClassroomDashboard());
+    if (addStudent.fulfilled.match(result)) {
+      if (result.payload.code === 200) {
+        // Berhasil tersimpan langsung ke server.
+        setName("");
+        setNis("");
+        setGender("L");
+        dispatch(fetchClassroomDashboard());
+        onSuccess?.();
+      } else if (result.payload.code === 202) {
+        // Offline: data sudah aman di IndexedDB, form boleh dikosongkan.
+        // Dashboard TIDAK di-refresh dulu, karena data baru belum ada di server
+        // sampai proses sync (lib/pwa/offline-sync.ts) berhasil jalan.
+        setName("");
+        setNis("");
+        setGender("L");
+      }
     }
   };
 
@@ -71,6 +89,11 @@ function AddStudentForm() {
       {addSuccessMessage && (
         <p className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-bold text-emerald-700">
           {addSuccessMessage}
+        </p>
+      )}
+      {addOfflineMessage && (
+        <p className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-800">
+          ⚠️ {addOfflineMessage}
         </p>
       )}
 

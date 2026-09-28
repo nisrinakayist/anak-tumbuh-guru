@@ -6,9 +6,9 @@ type AddStudentModalProps = {
   onClose: () => void;
 };
 
-// Popup "Tambah Siswa Manual" -- dipakai di mobile, dibuka dari tombol di
-// sebelah "Import Excel". Di desktop form yang sama tetap tampil sebagai
-// panel permanen di StudentManagement, jadi modal ini tidak dipakai di sana.
+// Popup "Tambah Siswa Manual" -- dibuka dari tombol di sebelah "Import Excel"
+// (sekarang tampil di semua ukuran layar). Di desktop panel "Tambah Siswa
+// Manual" yang permanen di StudentManagement tetap ada sebagai jalur alternatif.
 function AddStudentModal({ onClose }: AddStudentModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/50 p-4 backdrop-blur-sm">
@@ -31,7 +31,7 @@ function AddStudentModal({ onClose }: AddStudentModalProps) {
         </div>
 
         <div className="mt-4">
-          <AddStudentForm />
+          <AddStudentForm onSuccess={onClose} />
         </div>
       </div>
     </div>

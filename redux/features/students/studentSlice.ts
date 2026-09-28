@@ -9,6 +9,9 @@ interface StudentState {
   addLoading: boolean;
   addError: string | null;
   addSuccessMessage: string | null;
+  // Diisi saat data siswa tidak berhasil terkirim ke server karena offline,
+  // dan sudah diantrekan ke IndexedDB (lihat lib/api/studentApi.ts, code 202).
+  addOfflineMessage: string | null;
 
   importStep: ImportStep;
   importLoading: boolean;
@@ -23,6 +26,7 @@ const initialState: StudentState = {
   addLoading: false,
   addError: null,
   addSuccessMessage: null,
+  addOfflineMessage: null,
 
   importStep: "idle",
   importLoading: false,
@@ -58,6 +62,7 @@ const studentSlice = createSlice({
     resetAddStudentStatus: (state) => {
       state.addError = null;
       state.addSuccessMessage = null;
+      state.addOfflineMessage = null;
     },
     resetImportWizard: (state) => {
       state.importStep = "idle";
@@ -78,8 +83,13 @@ const studentSlice = createSlice({
       })
       .addCase(addStudent.fulfilled, (state, action) => {
         state.addLoading = false;
+        state.addOfflineMessage = null;
+
         if (action.payload.code === 200) {
           state.addSuccessMessage = action.payload.message || "Siswa berhasil ditambahkan";
+        } else if (action.payload.code === 202) {
+          // Bukan sukses beneran ke server, tapi data sudah aman di antrean offline.
+          state.addOfflineMessage = action.payload.message || "Data disimpan sementara secara offline.";
         } else {
           state.addError = action.payload.message || "Gagal menambahkan siswa";
         }

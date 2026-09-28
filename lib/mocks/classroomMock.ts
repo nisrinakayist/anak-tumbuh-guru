@@ -14,7 +14,10 @@ const mockStudentNames = [
   "Jasmine Aulia",
 ];
 
-const mockStudents: Student[] = mockStudentNames.map((name, index) => ({
+// "let" (bukan const) karena array ini akan diisi lagi setiap kali siswa baru
+// ditambahkan lewat mode mock (lihat lib/mocks/studentMock.ts). Diekspor
+// supaya buildMockAddStudentResponse() bisa push langsung ke array yang sama.
+export const mockStudents: Student[] = mockStudentNames.map((name, index) => ({
   id: index + 1,
   uuid: `mock-student-${index + 1}`,
   name,
@@ -27,7 +30,11 @@ const mockStudents: Student[] = mockStudentNames.map((name, index) => ({
   today_status: index < 7 ? "filled" : "not_filled",
 }));
 
-export const mockClassroomDashboard: ClassroomDashboardResponse = {
+// Dibuat sebagai fungsi (bukan objek statis) supaya summary & total_students
+// selalu dihitung ulang dari isi mockStudents TERKINI. Kalau ini objek statis,
+// siswa yang baru ditambah lewat form manual tidak akan pernah muncul di
+// tabel karena angkanya "dibekukan" sejak pertama kali file ini di-import.
+export const getMockClassroomDashboard = (): ClassroomDashboardResponse => ({
   code: 200,
   status: "success",
   message: "OK (data dummy)",
@@ -50,4 +57,4 @@ export const mockClassroomDashboard: ClassroomDashboardResponse = {
     },
     students: mockStudents,
   },
-};
+});
