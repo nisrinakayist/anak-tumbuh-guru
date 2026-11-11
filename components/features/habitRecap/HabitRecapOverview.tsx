@@ -1,14 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FiChevronRight, FiDownload, FiTrendingUp } from "react-icons/fi";
+import { getHabitOverviewApi, HabitOverview } from "@/lib/api/habitRecapApi";
 import { HABIT_ORDER, HABIT_RECAP_CONFIG } from "@/lib/constants/habitRecapConfig";
-import { HABIT_RECAP_MOCKS } from "@/lib/mocks/habitRecapMock";
-
-const getPercentage = (habitId: (typeof HABIT_ORDER)[number]) => {
-  const data = HABIT_RECAP_MOCKS[habitId];
-  if (!data) return 0;
-  const report = data.summary.find((item) => item.key === "report_rate");
-  return Number.parseInt(report?.value ?? "0", 10);
-};
+import { isMockEnabled } from "@/lib/utils/mock";
+import SpinLoader from "@/components/ui/Loader/SpinLoader";
+import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
 
 const getDescription = (habitId: (typeof HABIT_ORDER)[number]) => {
   const descriptions: Record<(typeof HABIT_ORDER)[number], string> = {
@@ -24,6 +23,35 @@ const getDescription = (habitId: (typeof HABIT_ORDER)[number]) => {
 };
 
 export default function HabitRecapOverview() {
+  const [overview, setOverview] = useState<HabitOverview | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getHabitOverviewApi().then((result) => {
+      if (cancelled) return;
+      if (result.ok) setOverview(result.data);
+      else setError(result.error.message);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (error) return <ErrorAlert message={error} />;
+
+  if (!overview) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <SpinLoader size={48} />
+      </div>
+    );
+  }
+
+  const getPercentage = (habitId: (typeof HABIT_ORDER)[number]) => overview.rates[habitId] ?? 0;
+  const consistencyLabel =
+    overview.averageRate >= 80 ? "Baik" : overview.averageRate >= 50 ? "Cukup" : "Perlu Pendampingan";
+
   return (
     <div className="mx-auto max-w-2xl space-y-4 pb-2 lg:max-w-5xl">
       <section className="rounded-2xl border border-primary-100 bg-white p-4 shadow-sm sm:p-5">
@@ -41,11 +69,11 @@ export default function HabitRecapOverview() {
         <div className="mt-4 rounded-2xl bg-primary-900 p-4 text-white shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[9px] font-black uppercase tracking-wide text-primary-200">Kelas 1 • Rombel 1-A</p>
+              <p className="text-[9px] font-black uppercase tracking-wide text-primary-200">{overview.classLabel}</p>
               <p className="mt-2 text-xs font-semibold text-primary-200">Rata-rata Keterlaksanaan Kelas</p>
               <div className="mt-0.5 flex items-end gap-2">
-                <strong className="text-3xl font-black">71.4%</strong>
-                <span className="pb-1 text-[9px] font-bold text-secondary-500">+3.2% minggu ini</span>
+                <strong className="text-3xl font-black">{overview.averageRate}%</strong>
+                <span className="pb-1 text-[9px] font-bold text-secondary-500">hari ini</span>
               </div>
             </div>
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white">
@@ -53,18 +81,18 @@ export default function HabitRecapOverview() {
             </div>
           </div>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/15">
-            <div className="h-full w-[71.4%] rounded-full bg-secondary-500" />
+            <div className="h-full rounded-full bg-secondary-500" style={{ width: `${overview.averageRate}%` }} />
           </div>
           <div className="mt-2 flex justify-between text-[8px] font-bold text-white/65">
-            <span>Total: 140 Entri</span>
-            <span>Konsistensi: Baik</span>
+            <span>Total: {overview.totalEntries} Entri hari ini</span>
+            <span>Konsistensi: {consistencyLabel}</span>
           </div>
         </div>
       </section>
 
       <div className="flex items-center justify-between px-1">
         <h2 className="text-[10px] font-black uppercase tracking-wide text-primary-900">Daftar Karakter Utama</h2>
-        <span className="text-[9px] font-bold text-primary-500">Semester Ganjil</span>
+        <span className="text-[9px] font-bold text-primary-500">Hari ini</span>
       </div>
 
       <div className="space-y-2.5">
@@ -112,16 +140,21 @@ export default function HabitRecapOverview() {
         })}
       </div>
 
-      <button
-        type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-3 text-[10px] font-black text-white shadow-sm transition hover:bg-primary-700"
-      >
-        <FiDownload size={15} />
-        Unduh Rekap Lengkap (Semua Kebiasaan)
-      </button>
-      <p className="px-4 text-center text-[8px] font-semibold text-primary-900/45">
-        Format PDF/Excel kompatibel untuk pelaporan wali murid & kepala sekolah
-      </p>
+      {/* Tombol unduh gabungan belum punya endpoint: hanya tampil di mode dummy. */}
+      {isMockEnabled() && (
+        <>
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-3 text-[10px] font-black text-white shadow-sm transition hover:bg-primary-700"
+        >
+          <FiDownload size={15} />
+          Unduh Rekap Lengkap (Semua Kebiasaan)
+        </button>
+        <p className="px-4 text-center text-[8px] font-semibold text-primary-900/45">
+          Format PDF/Excel kompatibel untuk pelaporan wali murid & kepala sekolah
+        </p>
+        </>
+      )}
     </div>
   );
 }

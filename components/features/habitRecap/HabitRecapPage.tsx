@@ -3,6 +3,7 @@
 import useHabitRecap from "@/hook/useHabitRecap";
 import { HABIT_PERIOD_OPTIONS, getHabitConfig } from "@/lib/constants/habitRecapConfig";
 import { HabitId } from "@/lib/types/habitRecapType";
+import { isMockEnabled } from "@/lib/utils/mock";
 import SpinLoader from "@/components/ui/Loader/SpinLoader";
 import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
 import RecapHero from "@/components/features/habitRecap/RecapHero";
@@ -78,7 +79,10 @@ export default function HabitRecapPage({ habitId }: HabitRecapPageProps) {
         teacherName={classGroup.teacher_name}
         totalStudents={classGroup.total_students}
       >
-        <PeriodFilter value={period} options={HABIT_PERIOD_OPTIONS} onChange={handlePeriodChange} />
+        {/* Backend belum punya rekap per periode: rekap asli hanya untuk hari ini. */}
+        {isMockEnabled() && (
+          <PeriodFilter value={period} options={HABIT_PERIOD_OPTIONS} onChange={handlePeriodChange} />
+        )}
         <ExportRecapButton
           records={filteredStudents}
           fileName={`rekap-${config.id}-kelas-${classGroup.name}`}

@@ -1,92 +1,52 @@
-import { AddStudentPayload, AddStudentResponse } from "@/lib/types/studentType";
-import {
-  StudentImportValidationResponse,
-  StudentImportCommitResponse,
-  ValidatedStudentImportRow,
-} from "@/lib/types/studentImportType";
+import { AddStudentPayload, Student } from "@/lib/types/studentType";
+import { ImportCommitResult, ImportPreviewResult } from "@/lib/types/studentImportType";
 import { mockStudents } from "@/lib/mocks/classroomMock";
 
-// Sebelumnya fungsi ini cuma "berpura-pura" berhasil (return data dummy tanpa
-// pernah disimpan ke mana pun), jadi siswa baru tidak pernah muncul di tabel
-// setelah disimpan. Sekarang siswa baru benar-benar di-push ke mockStudents
-// (array yang sama dipakai getMockClassroomDashboard), jadi begitu
-// StudentManagement refetch dashboard, siswa baru langsung kelihatan di tabel.
-export const buildMockAddStudentResponse = (payload: AddStudentPayload): AddStudentResponse => {
-  const newStudent = {
+// Siswa baru benar-benar di-push ke mockStudents (array yang sama dipakai
+// getMockClassroomDashboard), jadi begitu dashboard di-refresh siswa baru
+// langsung kelihatan di tabel.
+export const buildMockAddStudent = (payload: AddStudentPayload): Student => {
+  const newStudent: Student = {
     id: mockStudents.length + 1,
-    uuid: `mock-student-new-${Date.now()}`,
     name: payload.name,
     nis: payload.nis,
     gender: payload.gender,
-    status: "active" as const,
+    status: "active",
     points: 0,
     level: 1,
     class_rank: mockStudents.length + 1,
-    today_status: "not_filled" as const,
+    today_status: "not_filled",
   };
 
   mockStudents.push(newStudent);
-
-  return {
-    code: 200,
-    status: "success",
-    message: `${payload.name} berhasil ditambahkan (data dummy)`,
-    data: newStudent,
-  };
+  return newStudent;
 };
 
-// Baris ke-3 sengaja dibuat invalid untuk mendemokan tampilan error preview import.
-const mockImportRows: ValidatedStudentImportRow[] = [
-  {
-    row_number: 2,
-    name: "Keisha Ramadhani",
-    nis: "2025011",
-    gender: "P",
-    education_level: "Kelas 1",
-    class_group_name: "1-A",
-    valid: true,
-    errors: [],
-  },
-  {
-    row_number: 3,
-    name: "Lutfi Hakim",
-    nis: "2025012",
-    gender: "L",
-    education_level: "Kelas 1",
-    class_group_name: "1-A",
-    valid: true,
-    errors: [],
-  },
-  {
-    row_number: 4,
-    name: "",
-    nis: "2025011",
-    gender: "L",
-    education_level: "Kelas 1",
-    class_group_name: "1-A",
-    valid: false,
-    errors: ["Nama Lengkap wajib diisi", "NIS duplikat dengan baris 2"],
-  },
-];
-
-export const mockImportValidationResponse: StudentImportValidationResponse = {
-  code: 200,
-  status: "success",
-  message: "File berhasil divalidasi (data dummy)",
-  data: {
-    rows: mockImportRows,
-    valid_count: mockImportRows.filter((row) => row.valid).length,
-    invalid_count: mockImportRows.filter((row) => !row.valid).length,
-  },
+// Baris 4 sengaja invalid untuk mendemokan tampilan error di preview import.
+export const mockImportPreview: ImportPreviewResult = {
+  total_rows: 3,
+  valid_count: 2,
+  invalid_count: 1,
+  sample_valid: [
+    { row: 2, data: { name: "Keisha Ramadhani", nisn: "2025011", gender: "perempuan" } },
+    { row: 3, data: { name: "Lutfi Hakim", nisn: "2025012", gender: "laki-laki" } },
+  ],
+  invalid_rows: [
+    {
+      row: 4,
+      errors: {
+        name: ["Nama Lengkap wajib diisi"],
+        nisn: ["Nilai '2025011' kembar dengan baris 2 di file ini"],
+      },
+    },
+  ],
 };
 
-export const buildMockCommitResponse = (
-  rows: ValidatedStudentImportRow[]
-): StudentImportCommitResponse => ({
-  code: 200,
-  status: "success",
-  message: "Import berhasil (data dummy)",
-  data: {
-    imported_count: rows.filter((row) => row.valid).length,
-  },
+export const buildMockImportCommit = (): ImportCommitResult => ({
+  batch_id: 1,
+  total_rows: 2,
+  processed_rows: 2,
+  successful_rows: 2,
+  rejected_rows: 0,
+  errors: [],
 });

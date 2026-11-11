@@ -13,7 +13,7 @@ export default function ReportStatusBadge({ status }: ReportStatusBadgeProps) {
 
   return (
     <StatusBadge
-      label={isConfirmed ? "Terkonfirmasi Ortu" : "Belum Mengisi"}
+      label={isConfirmed ? "Sudah Mengisi" : "Belum Mengisi"}
       tone={isConfirmed ? "info" : "danger"}
       icon={isConfirmed ? FiCheckCircle : FiAlertCircle}
     />

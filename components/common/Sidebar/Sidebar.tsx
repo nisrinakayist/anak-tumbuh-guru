@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { NAV_ITEMS, isNavGroup } from "@/lib/constants/navigation";
+import { isMockEnabled } from "@/lib/utils/mock";
 import SidebarRoleCard from "@/components/common/Sidebar/SidebarRoleCard";
 import SidebarLink from "@/components/common/Sidebar/SidebarLink";
 import SidebarGroup from "@/components/common/Sidebar/SidebarGroup";
@@ -49,7 +50,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <SidebarRoleCard roleLabel={rombelName ? `Wali Kelas ${rombelName}` : "Wali Kelas"} />
 
         <nav className="mt-6 flex-1 space-y-1.5 px-3 pb-6">
-          {NAV_ITEMS.map((item) =>
+          {NAV_ITEMS.filter((item) => isNavGroup(item) || !item.requiresMock || isMockEnabled()).map((item) =>
             isNavGroup(item) ? (
               <SidebarGroup key={item.label} item={item} pathname={pathname} onNavigate={onClose} />
             ) : (

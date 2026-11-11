@@ -1,47 +1,81 @@
-import { ValidatedStudentImportRow } from "@/lib/types/studentImportType";
+import { ImportPreviewResult } from "@/lib/types/studentImportType";
 
 type ImportPreviewTableProps = {
-  rows: ValidatedStudentImportRow[];
+  preview: ImportPreviewResult;
 };
 
-function ImportPreviewTable({ rows }: ImportPreviewTableProps) {
+const FIELD_LABEL: Record<string, string> = {
+  name: "Nama Lengkap",
+  nisn: "NISN",
+  gender: "Gender",
+  general: "Umum",
+};
+
+// Backend hanya mengirim 5 contoh baris valid dan SELURUH baris yang error,
+// jadi tabel contoh dan daftar error ditampilkan terpisah.
+function ImportPreviewTable({ preview }: ImportPreviewTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-primary-100">
-      <table className="w-full min-w-[640px] text-left text-xs">
-        <thead className="bg-primary-50 text-primary-900/60">
-          <tr>
-            <th className="px-3 py-3 font-bold">Baris</th>
-            <th className="px-3 py-3 font-bold">Nama</th>
-            <th className="px-3 py-3 font-bold">NIS</th>
-            <th className="px-3 py-3 font-bold">Jenis Kelamin</th>
-            <th className="px-3 py-3 font-bold">Status Validasi</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-primary-50">
-          {rows.map((row) => (
-            <tr key={row.row_number}>
-              <td className="px-3 py-3 text-primary-900/45">{row.row_number}</td>
-              <td className="px-3 py-3 font-bold text-primary-900">{row.name || "—"}</td>
-              <td className="px-3 py-3 text-primary-900">{row.nis || "—"}</td>
-              <td className="px-3 py-3 text-primary-900">{row.gender || "—"}</td>
-              <td className="px-3 py-3">
-                {row.valid ? (
-                  <span className="font-black text-emerald-600">Valid</span>
-                ) : (
-                  <div>
-                    <span className="font-black text-red-600">Error</span>
-                    <ul className="mt-1 list-disc pl-4 text-red-500">
-                      {row.errors.map((message) => (
-                        <li key={message}>{message}</li>
-                      ))}
+    <div className="space-y-4">
+      {preview.invalid_rows.length > 0 && (
+        <div className="overflow-x-auto rounded-2xl border border-red-100">
+          <table className="w-full min-w-[480px] text-left text-xs">
+            <thead className="bg-red-50 text-red-700">
+              <tr>
+                <th className="px-3 py-3 font-bold">Baris Excel</th>
+                <th className="px-3 py-3 font-bold">Masalah</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-red-50">
+              {preview.invalid_rows.map((row) => (
+                <tr key={row.row}>
+                  <td className="px-3 py-3 font-black text-primary-900">{row.row}</td>
+                  <td className="px-3 py-3">
+                    <ul className="list-disc space-y-0.5 pl-4 text-red-600">
+                      {Object.entries(row.errors).flatMap(([field, messages]) =>
+                        messages.map((message) => (
+                          <li key={`${field}-${message}`}>
+                            <span className="font-bold">{FIELD_LABEL[field] ?? field}:</span> {message}
+                          </li>
+                        ))
+                      )}
                     </ul>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {preview.sample_valid.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-bold text-primary-900/60">
+            Contoh baris valid (maksimal {preview.sample_valid.length} baris pertama)
+          </p>
+          <div className="overflow-x-auto rounded-2xl border border-primary-100">
+            <table className="w-full min-w-[480px] text-left text-xs">
+              <thead className="bg-primary-50 text-primary-900/60">
+                <tr>
+                  <th className="px-3 py-3 font-bold">Baris</th>
+                  <th className="px-3 py-3 font-bold">Nama</th>
+                  <th className="px-3 py-3 font-bold">NISN</th>
+                  <th className="px-3 py-3 font-bold">Gender</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-primary-50">
+                {preview.sample_valid.map((row) => (
+                  <tr key={row.row}>
+                    <td className="px-3 py-3 text-primary-900/45">{row.row}</td>
+                    <td className="px-3 py-3 font-bold text-primary-900">{row.data.name || "—"}</td>
+                    <td className="px-3 py-3 text-primary-900">{row.data.nisn || "—"}</td>
+                    <td className="px-3 py-3 text-primary-900">{row.data.gender || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -64,7 +64,7 @@ function ClassroomMonitoring() {
       <div className="overflow-hidden rounded-3xl border border-primary-100 bg-white shadow-sm">
         <div className="border-b border-primary-50 p-4 sm:p-5">
           <SearchInput
-            placeholder="Cari nama atau NIS siswa..."
+            placeholder="Cari nama atau NISN siswa..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />

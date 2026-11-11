@@ -11,8 +11,8 @@ import PrimaryButton from "@/components/ui/Button/PrimaryButton";
 import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
 
 type AddStudentFormProps = {
-  // Dipanggil setelah siswa BERHASIL tersimpan ke server (code 200), bukan
-  // saat masuk antrean offline (code 202) -- supaya AddStudentModal bisa
+  // Dipanggil setelah siswa BERHASIL tersimpan ke server (kind "saved"), bukan
+  // saat masuk antrean offline (kind "queued") -- supaya AddStudentModal bisa
   // menutup dirinya sendiri begitu tabel di belakangnya sudah terupdate.
   onSuccess?: () => void;
 };
@@ -34,14 +34,14 @@ function AddStudentForm({ onSuccess }: AddStudentFormProps) {
     const result = await dispatch(addStudent({ name, nis, gender }));
 
     if (addStudent.fulfilled.match(result)) {
-      if (result.payload.code === 200) {
+      if (result.payload.kind === "saved") {
         // Berhasil tersimpan langsung ke server.
         setName("");
         setNis("");
         setGender("L");
         dispatch(fetchClassroomDashboard());
         onSuccess?.();
-      } else if (result.payload.code === 202) {
+      } else if (result.payload.kind === "queued") {
         // Offline: data sudah aman di IndexedDB, form boleh dikosongkan.
         // Dashboard TIDAK di-refresh dulu, karena data baru belum ada di server
         // sampai proses sync (lib/pwa/offline-sync.ts) berhasil jalan.
@@ -65,10 +65,10 @@ function AddStudentForm({ onSuccess }: AddStudentFormProps) {
       />
 
       <TextInput
-        label="NISN / NIS"
+        label="NISN"
         name="nis"
         type="text"
-        placeholder="Nomor induk siswa"
+        placeholder="Nomor Induk Siswa Nasional"
         required
         value={nis}
         onChange={(event) => setNis(event.target.value)}

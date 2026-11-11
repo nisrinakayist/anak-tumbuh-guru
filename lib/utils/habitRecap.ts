@@ -52,7 +52,7 @@ export const buildRecapCsv = (
     record.name,
     record.primary_value ?? "Belum tercatat",
     record.method_label ?? "-",
-    record.report_status === "confirmed" ? "Terkonfirmasi Ortu" : "Belum Mengisi",
+    record.report_status === "confirmed" ? "Sudah Mengisi" : "Belum Mengisi",
     record.points,
   ]);
 

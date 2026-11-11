@@ -1,20 +1,11 @@
-import { AuthApiResponse } from "@/lib/types/authType";
+import { User } from "@/lib/types/userType";
 
-export const mockLoginResponse: AuthApiResponse = {
-  code: 200,
-  status: "success",
-  message: "Login berhasil (data dummy)",
-  data: {
-    id: 1,
-    uuid: "mock-teacher-uuid",
-    name: "Bu Nisrina",
-    username: "198901012020012001",
-    email: "guru1@anaktumbuh.id",
-    role: "teacher",
-    school_id: 1,
-    class_id: 1,
-    avatar_url: null,
-    is_active: 1,
-  },
-  access_token: "mock-access-token-123",
+export const MOCK_ACCESS_TOKEN = "mock-access-token-123";
+
+export const mockUser: User = {
+  id: 1,
+  role: "teacher",
+  name: "Bu Nisrina",
+  nip: "198901012020012001",
+  school: { id: 1, name: "SD Negeri Contoh" },
 };

@@ -20,7 +20,7 @@ function QrCard({ name, nis, dataUrl }: QrCardProps) {
         </div>
       )}
       <p className="mt-2 text-sm font-extrabold text-primary-900">{name}</p>
-      <p className="text-xs text-primary-900/50">NIS {nis}</p>
+      <p className="text-xs text-primary-900/50">NISN {nis}</p>
 
       {dataUrl && <DownloadQrButton qrDataUrl={dataUrl} fileName={fileName} />}
     </div>

@@ -30,26 +30,17 @@ function LoginForm() {
     dispatch(clearAuthMessage());
 
     // Wali Kelas login menggunakan NIP sebagai username.
-    // Password tetap dikirim dari field password dan diisi dengan NIP oleh pengguna.
     const result = await dispatch(login({ username: nip.trim(), password }));
 
     if (login.fulfilled.match(result)) {
-      const { code, data, message, access_token } = result.payload;
-
-      if (code === 200 && data) {
-        localStorage.setItem("access_token", access_token);
-        setShowSuccess(true);
-        setTimeout(() => {
-          router.push(TEACHER_DASHBOARD_PATH);
-        }, 1200);
-        return;
-      }
-
-      setFormError(message || "NIP atau password salah.");
+      setShowSuccess(true);
+      setTimeout(() => {
+        router.push(TEACHER_DASHBOARD_PATH);
+      }, 1200);
       return;
     }
 
-    setFormError("Gagal melakukan login, silakan coba lagi.");
+    setFormError(result.payload ?? "Gagal melakukan login, silakan coba lagi.");
   };
 
   return (

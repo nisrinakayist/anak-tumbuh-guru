@@ -15,7 +15,7 @@ function StudentListMobile({ students }: StudentListMobileProps) {
               <p className="font-extrabold text-primary-900">
                 #{student.class_rank} · {student.name}
               </p>
-              <p className="mt-1 text-xs text-primary-900/45">NIS {student.nis}</p>
+              <p className="mt-1 text-xs text-primary-900/45">NISN {student.nis}</p>
             </div>
             <FillStatusBadge status={student.today_status} />
           </div>

@@ -1,36 +1,21 @@
-// Akun & QR Siswa: fitur Generate Akun + QR Code untuk siswa di rombel Guru.
-// Sesuai dokumen bag. 7 ("...Preview -> Generate Akun") dan bag. 8
-// ("Akses Siswa (QR Code): Siswa menggunakan login berbasis QR Code...
-// Kartu QR Code dapat dicetak oleh pihak sekolah/wali kelas").
-export type AccountStatus = "generated" | "not_generated";
-export type QrStatus = "active" | "revoked" | "not_available";
-
+// Akun & QR Siswa.
+// Akun login siswa dibuat OTOMATIS saat siswa dibuat (username & password
+// awal = NISN), jadi tidak ada lagi "generate akun". QR dibuat lewat
+// POST /qr-tokens/{studentId}/regenerate; nilai qr_payload hanya dikirim
+// SEKALI oleh backend (tidak disimpan), jadi hanya tersedia di sesi ini.
 export type StudentCredential = {
   student_id: number;
   name: string;
   nis: string;
   class_group_name: string;
   academic_year: string;
-  account_status: AccountStatus;
-  qr_status: QrStatus;
+  status: "active" | "inactive" | "graduated";
 };
 
-export type StudentCredentialListResponse = {
-  code: number;
-  status: string;
-  message: string;
-  data: StudentCredential[] | null;
-};
-
-export type GenerateAccountsResponse = {
-  code: number;
-  status: string;
-  message: string;
-  data: { generated_count: number } | null;
-};
-
-export type RevokeQrResponse = {
-  code: number;
-  status: string;
-  message: string;
+// Siswa yang QR-nya sudah dibuat pada sesi ini dan siap dicetak/diunduh.
+export type PrintableQr = {
+  student_id: number;
+  name: string;
+  nis: string;
+  qr_payload: string;
 };

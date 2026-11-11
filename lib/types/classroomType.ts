@@ -13,10 +13,3 @@ export type ClassroomDashboardData = {
   summary: ClassroomSummary;
   students: Student[];
 };
-
-export type ClassroomDashboardResponse = {
-  code: number;
-  status: string;
-  message: string;
-  data: ClassroomDashboardData | null;
-};

@@ -1,96 +1,63 @@
-import {
-  StudentCredentialListResponse,
-  GenerateAccountsResponse,
-  RevokeQrResponse,
-} from "@/lib/types/studentAccountType";
-import { isMockEnabled, mockDelay } from "@/lib/utils/mock";
+import { apiRequest } from "@/lib/api/client";
+import { getRombelInfoApi, getRombelStudentsApi } from "@/lib/api/classroomApi";
 import { mockStudentCredentials } from "@/lib/mocks/studentAccountMock";
+import { ApiResult } from "@/lib/types/apiType";
+import { StudentCredential } from "@/lib/types/studentAccountType";
+import { isMockEnabled, mockDelay } from "@/lib/utils/mock";
 
-// Ambil daftar status akun & QR seluruh siswa di rombel Guru yang login
-export async function getStudentCredentialsApi(): Promise<StudentCredentialListResponse> {
+// Daftar siswa rombel untuk halaman Akun & QR. Backend belum punya endpoint
+// status akun/QR per siswa, jadi daftar dibangun dari GET /students dan info
+// rombel; status QR hanya diketahui untuk QR yang dibuat pada sesi ini.
+export async function getStudentCredentialsApi(): Promise<ApiResult<StudentCredential[]>> {
   if (isMockEnabled()) {
     await mockDelay();
-    return {
-      code: 200,
-      status: "success",
-      message: "OK (data dummy)",
-      data: mockStudentCredentials,
-    };
+    return { ok: true, status: 200, data: mockStudentCredentials };
   }
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/teacher/student/credentials`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      }
-    );
-    return await res.json();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
+  const [info, students] = await Promise.all([getRombelInfoApi(), getRombelStudentsApi()]);
+  if (!info.ok) return info;
+  if (!students.ok) return students;
+
+  return {
+    ok: true,
+    status: 200,
+    data: students.data.map((student) => ({
+      student_id: student.id,
+      name: student.fullname,
+      nis: student.nisn,
+      class_group_name: `${info.data.classGroup.education_level} · ${info.data.classGroup.name}`,
+      academic_year: info.data.classGroup.academic_year,
+      status: student.status,
+    })),
+  };
 }
 
-// Generate Akun + QR untuk siswa yang dipilih (yang belum punya akun)
-export async function generateStudentAccountsApi(
-  studentIds: number[]
-): Promise<GenerateAccountsResponse> {
+// POST /qr-tokens/{studentId}/regenerate -> { qr_payload }.
+// PERHATIAN: QR lama milik siswa tersebut langsung tidak berlaku. qr_payload
+// hanya dikirim sekali (tidak disimpan backend), jadi harus langsung dipakai.
+export async function regenerateQrApi(studentId: number): Promise<ApiResult<{ qr_payload: string }>> {
   if (isMockEnabled()) {
-    await mockDelay();
-    return {
-      code: 200,
-      status: "success",
-      message: `${studentIds.length} akun & QR berhasil digenerate (data dummy)`,
-      data: { generated_count: studentIds.length },
-    };
+    await mockDelay(300);
+    return { ok: true, status: 200, data: { qr_payload: `mock-qr-payload-${studentId}` } };
   }
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/teacher/student/credentials/generate`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify({ student_ids: studentIds }),
-      }
-    );
-    return await res.json();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
+  return apiRequest<{ qr_payload: string }>(`/qr-tokens/${studentId}/regenerate`, {
+    method: "POST",
+  });
 }
 
-// Revoke (nonaktifkan) QR Code siswa tertentu
-export async function revokeStudentQrApi(studentId: number): Promise<RevokeQrResponse> {
+// POST /students/{id}/reset-password: wajib body { new_password } (min. 8 karakter).
+export async function resetStudentPasswordApi(
+  studentId: number,
+  newPassword: string
+): Promise<ApiResult<unknown>> {
   if (isMockEnabled()) {
-    await mockDelay();
-    return { code: 200, status: "success", message: "QR berhasil di-revoke (data dummy)" };
+    await mockDelay(300);
+    return { ok: true, status: 200, data: null };
   }
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/teacher/student/credentials/${studentId}/revoke`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      }
-    );
-    return await res.json();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
+  return apiRequest(`/students/${studentId}/reset-password`, {
+    method: "POST",
+    body: { new_password: newPassword },
+  });
 }

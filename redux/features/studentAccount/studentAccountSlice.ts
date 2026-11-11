@@ -1,7 +1,7 @@
 import {
   getStudentCredentialsApi,
-  generateStudentAccountsApi,
-  revokeStudentQrApi,
+  regenerateQrApi,
+  resetStudentPasswordApi,
 } from "@/lib/api/studentAccountApi";
 import { StudentCredential } from "@/lib/types/studentAccountType";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
@@ -10,48 +10,88 @@ interface StudentAccountState {
   credentials: StudentCredential[];
   loading: boolean;
   error: string | null;
-  generating: boolean;
-  generateMessage: string | null;
+
+  // QR yang dibuat pada sesi ini: student_id -> qr_payload. Hanya di memori
+  // (backend tidak menyimpan payload), hilang saat halaman ditutup.
+  qrPayloads: Record<number, string>;
+  qrBusyIds: number[];
+  qrMessage: string | null;
+  qrError: string | null;
+
+  resetBusy: boolean;
+  resetMessage: string | null;
+  resetError: string | null;
 }
 
 const initialState: StudentAccountState = {
   credentials: [],
   loading: false,
   error: null,
-  generating: false,
-  generateMessage: null,
+
+  qrPayloads: {},
+  qrBusyIds: [],
+  qrMessage: null,
+  qrError: null,
+
+  resetBusy: false,
+  resetMessage: null,
+  resetError: null,
 };
 
-export const fetchStudentCredentials = createAsyncThunk(
-  "studentAccount/fetchCredentials",
-  async () => {
-    const response = await getStudentCredentialsApi();
-    return response;
-  }
-);
+export const fetchStudentCredentials = createAsyncThunk<
+  StudentCredential[],
+  void,
+  { rejectValue: string }
+>("studentAccount/fetchCredentials", async (_, { rejectWithValue }) => {
+  const result = await getStudentCredentialsApi();
+  if (!result.ok) return rejectWithValue(result.error.message);
+  return result.data;
+});
 
-export const generateStudentAccounts = createAsyncThunk(
-  "studentAccount/generateAccounts",
-  async (studentIds: number[]) => {
-    const response = await generateStudentAccountsApi(studentIds);
-    return response;
-  }
-);
+// Buat QR baru untuk beberapa siswa, SATU PER SATU (menghindari lonjakan
+// request). Siswa yang gagal tidak menghentikan yang lain.
+export const regenerateQrBatch = createAsyncThunk<
+  { payloads: Record<number, string>; failed: { id: number; message: string }[] },
+  number[]
+>("studentAccount/regenerateQrBatch", async (studentIds) => {
+  const payloads: Record<number, string> = {};
+  const failed: { id: number; message: string }[] = [];
 
-export const revokeStudentQr = createAsyncThunk(
-  "studentAccount/revokeQr",
-  async (studentId: number) => {
-    const response = await revokeStudentQrApi(studentId);
-    return { studentId, response };
+  for (const id of studentIds) {
+    const result = await regenerateQrApi(id);
+    if (result.ok) payloads[id] = result.data.qr_payload;
+    else failed.push({ id, message: result.error.message });
   }
-);
+
+  return { payloads, failed };
+});
+
+export const resetStudentPassword = createAsyncThunk<
+  void,
+  { studentId: number; newPassword: string },
+  { rejectValue: string }
+>("studentAccount/resetPassword", async ({ studentId, newPassword }, { rejectWithValue }) => {
+  const result = await resetStudentPasswordApi(studentId, newPassword);
+  if (!result.ok) return rejectWithValue(result.error.message);
+});
 
 const studentAccountSlice = createSlice({
   name: "studentAccount",
   initialState,
   reducers: {
-    clearGenerateMessage: (state) => {
-      state.generateMessage = null;
+    clearQrMessages: (state) => {
+      state.qrMessage = null;
+      state.qrError = null;
+    },
+    clearResetMessages: (state) => {
+      state.resetMessage = null;
+      state.resetError = null;
+    },
+    // Dipanggil saat halaman ditutup: qr_payload bersifat rahasia.
+    clearQrPayloads: (state) => {
+      state.qrPayloads = {};
+      state.qrMessage = null;
+      state.qrError = null;
     },
   },
   extraReducers: (builder) => {
@@ -62,46 +102,51 @@ const studentAccountSlice = createSlice({
       })
       .addCase(fetchStudentCredentials.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.code === 200 && action.payload.data) {
-          state.credentials = action.payload.data;
-        } else {
-          state.error = action.payload.message || "Gagal memuat data akun siswa";
-        }
+        state.credentials = action.payload;
       })
       .addCase(fetchStudentCredentials.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Gagal memuat data akun siswa";
+        state.error = action.payload ?? action.error.message ?? "Gagal memuat data siswa";
       })
 
-      .addCase(generateStudentAccounts.pending, (state) => {
-        state.generating = true;
+      .addCase(regenerateQrBatch.pending, (state, action) => {
+        state.qrBusyIds = [...new Set([...state.qrBusyIds, ...action.meta.arg])];
+        state.qrMessage = null;
+        state.qrError = null;
       })
-      .addCase(generateStudentAccounts.fulfilled, (state, action) => {
-        state.generating = false;
-        if (action.payload.code === 200) {
-          state.generateMessage = action.payload.message;
-          state.credentials = state.credentials.map((credential) =>
-            credential.account_status === "not_generated"
-              ? { ...credential, account_status: "generated", qr_status: "active" }
-              : credential
-          );
+      .addCase(regenerateQrBatch.fulfilled, (state, action) => {
+        const { payloads, failed } = action.payload;
+        state.qrBusyIds = state.qrBusyIds.filter((id) => !action.meta.arg.includes(id));
+        Object.assign(state.qrPayloads, payloads);
+
+        const successCount = Object.keys(payloads).length;
+        if (successCount > 0) {
+          state.qrMessage = `${successCount} QR baru berhasil dibuat. QR lama siswa tersebut tidak berlaku lagi.`;
+        }
+        if (failed.length > 0) {
+          state.qrError = `${failed.length} QR gagal dibuat: ${failed[0].message}`;
         }
       })
-      .addCase(generateStudentAccounts.rejected, (state) => {
-        state.generating = false;
+      .addCase(regenerateQrBatch.rejected, (state, action) => {
+        state.qrBusyIds = state.qrBusyIds.filter((id) => !action.meta.arg.includes(id));
+        state.qrError = action.error.message || "Gagal membuat QR";
       })
 
-      .addCase(revokeStudentQr.fulfilled, (state, action) => {
-        if (action.payload.response.code === 200) {
-          state.credentials = state.credentials.map((credential) =>
-            credential.student_id === action.payload.studentId
-              ? { ...credential, qr_status: "revoked" }
-              : credential
-          );
-        }
+      .addCase(resetStudentPassword.pending, (state) => {
+        state.resetBusy = true;
+        state.resetMessage = null;
+        state.resetError = null;
+      })
+      .addCase(resetStudentPassword.fulfilled, (state) => {
+        state.resetBusy = false;
+        state.resetMessage = "Password siswa berhasil direset.";
+      })
+      .addCase(resetStudentPassword.rejected, (state, action) => {
+        state.resetBusy = false;
+        state.resetError = action.payload ?? action.error.message ?? "Gagal mereset password";
       });
   },
 });
 
-export const { clearGenerateMessage } = studentAccountSlice.actions;
+export const { clearQrMessages, clearResetMessages, clearQrPayloads } = studentAccountSlice.actions;
 export default studentAccountSlice.reducer;

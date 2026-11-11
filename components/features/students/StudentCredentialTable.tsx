@@ -1,74 +1,86 @@
 import { StudentCredential } from "@/lib/types/studentAccountType";
 import StatusBadge from "@/components/ui/Badge/StatusBadge";
-import RevokeQrButton from "@/components/features/students/RevokeQrButton";
 
 type StudentCredentialTableProps = {
   credentials: StudentCredential[];
   selectedIds: number[];
+  readyIds: number[];
+  busyIds: number[];
   onToggleSelect: (studentId: number) => void;
+  onToggleSelectAll: () => void;
+  onResetPassword: (credential: StudentCredential) => void;
 };
 
 function StudentCredentialTable({
   credentials,
   selectedIds,
+  readyIds,
+  busyIds,
   onToggleSelect,
+  onToggleSelectAll,
+  onResetPassword,
 }: StudentCredentialTableProps) {
+  const allSelected = credentials.length > 0 && selectedIds.length === credentials.length;
+
   return (
     <div className="overflow-x-auto rounded-3xl border border-primary-100 bg-white shadow-sm">
       <table className="w-full min-w-[720px] text-left text-sm">
         <thead className="bg-primary-50 text-primary-900/60">
           <tr>
-            <th className="w-10 px-5 py-3" />
+            <th className="w-10 px-5 py-3">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-primary-500"
+                checked={allSelected}
+                onChange={onToggleSelectAll}
+                aria-label="Pilih semua siswa"
+              />
+            </th>
             <th className="px-5 py-3 font-bold">Siswa</th>
             <th className="px-5 py-3 font-bold">Kelas / Rombel</th>
-            <th className="px-5 py-3 font-bold">Angkatan</th>
-            <th className="px-5 py-3 font-bold">Akun</th>
-            <th className="px-5 py-3 font-bold">QR</th>
+            <th className="px-5 py-3 font-bold">Tahun Ajaran</th>
+            <th className="px-5 py-3 font-bold">QR (sesi ini)</th>
             <th className="px-5 py-3 font-bold">Aksi</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-primary-50">
           {credentials.map((credential) => {
-            const isPending = credential.account_status === "not_generated";
+            const isBusy = busyIds.includes(credential.student_id);
+            const isReady = readyIds.includes(credential.student_id);
             return (
               <tr key={credential.student_id} className="hover:bg-primary-50/50">
                 <td className="px-5 py-4">
-                  {isPending && (
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 accent-primary-500"
-                      checked={selectedIds.includes(credential.student_id)}
-                      onChange={() => onToggleSelect(credential.student_id)}
-                    />
-                  )}
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-primary-500"
+                    checked={selectedIds.includes(credential.student_id)}
+                    onChange={() => onToggleSelect(credential.student_id)}
+                    aria-label={`Pilih ${credential.name}`}
+                  />
                 </td>
                 <td className="px-5 py-4">
                   <p className="font-extrabold text-primary-900">{credential.name}</p>
-                  <p className="text-xs text-primary-900/45">{credential.nis}</p>
+                  <p className="text-xs text-primary-900/45">NISN {credential.nis}</p>
                 </td>
                 <td className="px-5 py-4 text-primary-900">{credential.class_group_name}</td>
                 <td className="px-5 py-4 text-primary-900">{credential.academic_year}</td>
                 <td className="px-5 py-4">
-                  {credential.account_status === "generated" ? (
-                    <StatusBadge label="Generated" tone="success" />
+                  {isBusy ? (
+                    <StatusBadge label="Membuat..." tone="warning" />
+                  ) : isReady ? (
+                    <StatusBadge label="Siap dicetak" tone="success" />
                   ) : (
-                    <StatusBadge label="Belum" tone="muted" />
+                    <StatusBadge label="Belum dibuat" tone="muted" />
                   )}
                 </td>
                 <td className="px-5 py-4">
-                  {credential.qr_status === "active" && <StatusBadge label="active" tone="success" />}
-                  {credential.qr_status === "revoked" && <StatusBadge label="revoked" tone="danger" />}
-                  {credential.qr_status === "not_available" && (
-                    <StatusBadge label="Tidak tersedia" tone="muted" />
-                  )}
-                </td>
-                <td className="px-5 py-4">
-                  {credential.qr_status === "active" && (
-                    <RevokeQrButton studentId={credential.student_id} />
-                  )}
-                  {credential.qr_status !== "active" && (
-                    <span className="text-xs text-primary-900/30">—</span>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => onResetPassword(credential)}
+                    className="rounded-lg border border-primary-200 px-2.5 py-1.5 text-[11px] font-black text-primary-900 transition hover:bg-primary-50"
+                  >
+                    Reset Password
+                  </button>
                 </td>
               </tr>
             );

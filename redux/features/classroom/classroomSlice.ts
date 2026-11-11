@@ -18,13 +18,15 @@ const initialState: ClassroomState = {
   error: null,
 };
 
-export const fetchClassroomDashboard = createAsyncThunk(
-  "classroom/fetchDashboard",
-  async () => {
-    const response = await getClassroomDashboardApi();
-    return response;
-  }
-);
+export const fetchClassroomDashboard = createAsyncThunk<
+  ClassroomDashboardData,
+  void,
+  { rejectValue: string }
+>("classroom/fetchDashboard", async (_, { rejectWithValue }) => {
+  const result = await getClassroomDashboardApi();
+  if (!result.ok) return rejectWithValue(result.error.message);
+  return result.data;
+});
 
 const classroomSlice = createSlice({
   name: "classroom",
@@ -38,17 +40,13 @@ const classroomSlice = createSlice({
       })
       .addCase(fetchClassroomDashboard.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.code === 200 && action.payload.data) {
-          state.classGroup = action.payload.data.class_group;
-          state.summary = action.payload.data.summary;
-          state.students = action.payload.data.students;
-        } else {
-          state.error = action.payload.message || "Gagal memuat data rombel";
-        }
+        state.classGroup = action.payload.class_group;
+        state.summary = action.payload.summary;
+        state.students = action.payload.students;
       })
       .addCase(fetchClassroomDashboard.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Gagal memuat data rombel";
+        state.error = action.payload ?? action.error.message ?? "Gagal memuat data rombel";
       });
   },
 });

@@ -97,16 +97,16 @@ const habitRecapSlice = createSlice({
       })
       .addCase(fetchHabitRecap.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.code === 200 && action.payload.data) {
+        if (action.payload.ok) {
           state.data = action.payload.data;
           state.notFound = false;
-        } else if (action.payload.code === 404) {
+        } else if (action.payload.status === 404) {
           state.data = null;
           state.notFound = true;
         } else {
           state.data = null;
           state.notFound = false;
-          state.error = action.payload.message || "Gagal memuat rekap kebiasaan";
+          state.error = action.payload.error.message || "Gagal memuat rekap kebiasaan";
         }
       })
       .addCase(fetchHabitRecap.rejected, (state, action) => {

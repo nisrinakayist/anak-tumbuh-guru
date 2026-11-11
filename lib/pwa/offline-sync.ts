@@ -1,10 +1,9 @@
-import { addStudentApi } from "@/lib/api/studentApi";
+import { OFFLINE_ADD_STUDENT, replayQueuedStudent } from "@/lib/api/studentApi";
 import {
   getPendingOfflineRecords,
   markOfflineRecordSynced,
   OfflineRecord,
 } from "@/lib/pwa/offline-db";
-import { AddStudentPayload } from "@/lib/types/studentType";
 
 export type SyncResult = {
   synced: number;
@@ -21,10 +20,8 @@ export type SyncResult = {
  */
 async function replayRecord(record: OfflineRecord): Promise<boolean> {
   switch (record.type) {
-    case "add_student": {
-      const response = await addStudentApi(record.payload as unknown as AddStudentPayload);
-      return response.code === 200;
-    }
+    case OFFLINE_ADD_STUDENT:
+      return replayQueuedStudent(record.payload);
 
     default:
       console.warn(`[offline-sync] Tidak ada handler untuk tipe: ${record.type}`);

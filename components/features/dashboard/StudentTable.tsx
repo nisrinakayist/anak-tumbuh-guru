@@ -24,7 +24,7 @@ function StudentTable({ students }: StudentTableProps) {
               <td className="px-5 py-4 font-extrabold text-primary-900">#{student.class_rank}</td>
               <td className="px-5 py-4">
                 <p className="font-extrabold text-primary-900">{student.name}</p>
-                <p className="text-xs text-primary-900/45">NIS {student.nis}</p>
+                <p className="text-xs text-primary-900/45">NISN {student.nis}</p>
               </td>
               <td className="px-5 py-4">
                 <FillStatusBadge status={student.today_status} />

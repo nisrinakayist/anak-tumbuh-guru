@@ -4,18 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import JSZip from "jszip";
 import { CiViewList, CiExport } from "react-icons/ci";
-import { StudentCredential } from "@/lib/types/studentAccountType";
+import { PrintableQr } from "@/lib/types/studentAccountType";
 import QrCard from "@/components/features/students/QrCard";
 import SearchInput from "@/components/ui/Search/SearchInput";
 
 type QrPrintModalProps = {
-  credentials: StudentCredential[];
+  items: PrintableQr[];
   onClose: () => void;
 };
 
-const buildQrToken = (nis: string) => `ANAKTUMBUH-${nis}`;
-
-function QrPrintModal({ credentials, onClose }: QrPrintModalProps) {
+// Isi QR = qr_payload dari POST /qr-tokens/{id}/regenerate. Itulah nilai yang
+// dibaca endpoint login siswa (POST /auth/login/student/qr, field qr_payload).
+function QrPrintModal({ items: credentials, onClose }: QrPrintModalProps) {
   const [query, setQuery] = useState("");
   const [qrDataUrls, setQrDataUrls] = useState<Record<number, string>>({});
   const [isZipping, setIsZipping] = useState(false);
@@ -27,7 +27,7 @@ function QrPrintModal({ credentials, onClose }: QrPrintModalProps) {
 
     Promise.all(
       credentials.map(async (credential) => {
-        const dataUrl = await QRCode.toDataURL(buildQrToken(credential.nis), {
+        const dataUrl = await QRCode.toDataURL(credential.qr_payload, {
           margin: 1,
           width: 200,
         });
@@ -120,7 +120,7 @@ function QrPrintModal({ credentials, onClose }: QrPrintModalProps) {
 
         <div className="border-b border-primary-50 px-5 py-3 print:hidden">
           <SearchInput
-            placeholder="Cari nama atau NIS siswa..."
+            placeholder="Cari nama atau NISN siswa..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />

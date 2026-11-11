@@ -7,6 +7,8 @@ export type NavLinkItem = {
   label: string;
   href: string;
   icon: IconType;
+  // true = fitur belum punya endpoint backend: hanya tampil di mode data dummy.
+  requiresMock?: boolean;
 };
 
 export type NavChildItem = {
@@ -45,6 +47,6 @@ export const NAV_ITEMS: NavItem[] = [
     basePath: "/dashboard/habit-recap",
     children: habitRecapChildren,
   },
-  { label: "Report Center", href: "/dashboard/report", icon: CiFileOn },
-  { label: "Pengaturan Panduan", href: "/dashboard/guide", icon: CiEdit },
+  { label: "Report Center", href: "/dashboard/report", icon: CiFileOn, requiresMock: true },
+  { label: "Pengaturan Panduan", href: "/dashboard/guide", icon: CiEdit, requiresMock: true },
 ];
