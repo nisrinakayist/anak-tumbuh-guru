@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
+import useCooldown from "@/hook/useCooldown";
+import { RATE_LIMIT_MESSAGE } from "@/lib/api/client";
 import {
   clearResetMessages,
   resetStudentPassword,
@@ -23,6 +25,7 @@ function ResetPasswordModal({ studentId, studentName, onClose }: ResetPasswordMo
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
 
+  const { remaining, start: startCooldown } = useCooldown();
   const dispatch = useDispatch<AppDispatch>();
   const { resetBusy, resetMessage, resetError } = useSelector(
     (state: RootState) => state.studentAccount
@@ -33,7 +36,7 @@ function ResetPasswordModal({ studentId, studentName, onClose }: ResetPasswordMo
     onClose();
   };
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setLocalError(null);
 
@@ -42,7 +45,10 @@ function ResetPasswordModal({ studentId, studentName, onClose }: ResetPasswordMo
       return;
     }
 
-    dispatch(resetStudentPassword({ studentId, newPassword: password }));
+    const result = await dispatch(resetStudentPassword({ studentId, newPassword: password }));
+    if (resetStudentPassword.rejected.match(result) && result.payload === RATE_LIMIT_MESSAGE) {
+      startCooldown();
+    }
   };
 
   return (
@@ -88,7 +94,9 @@ function ResetPasswordModal({ studentId, studentName, onClose }: ResetPasswordMo
               onChange={(event) => setPassword(event.target.value)}
             />
             {(localError || resetError) && <ErrorAlert message={localError ?? resetError ?? ""} />}
-            <PrimaryButton isLoading={resetBusy}>Reset Password</PrimaryButton>
+            <PrimaryButton isLoading={resetBusy} disabled={remaining > 0}>
+              {remaining > 0 ? `Coba lagi dalam ${remaining} detik` : "Reset Password"}
+            </PrimaryButton>
           </form>
         )}
       </div>

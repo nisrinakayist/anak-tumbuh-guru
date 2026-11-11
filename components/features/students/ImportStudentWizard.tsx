@@ -11,6 +11,7 @@ import {
 import { fetchClassroomDashboard } from "@/redux/features/classroom/classroomSlice";
 import { downloadStudentImportTemplateApi } from "@/lib/api/studentApi";
 import { saveBlob } from "@/lib/utils/download";
+import { IMPORT_MAX_ROWS, validateImportFile } from "@/lib/utils/importFile";
 import { isMockEnabled } from "@/lib/utils/mock";
 import FileInput from "@/components/ui/File/FileInput";
 import PrimaryButton from "@/components/ui/Button/PrimaryButton";
@@ -40,6 +41,13 @@ function ImportStudentWizard({ onClose }: ImportStudentWizardProps) {
   };
 
   const handleFileSelect = (file: File) => {
+    const problem = validateImportFile(file);
+    if (problem) {
+      fileRef.current = null;
+      setTemplateError(problem);
+      return;
+    }
+    setTemplateError(null);
     fileRef.current = file;
     dispatch(previewStudentImport(file));
   };
@@ -96,7 +104,7 @@ function ImportStudentWizard({ onClose }: ImportStudentWizardProps) {
             <div className="space-y-3">
               <FileInput
                 accept=".xlsx"
-                description="Format .xlsx sesuai template (kolom: Nama Lengkap, NISN, Gender), maksimal 5 MB"
+                description={`Format .xlsx sesuai template (kolom: Nama Lengkap, NISN, Gender), maksimal 5 MB dan ${IMPORT_MAX_ROWS} baris per file. File yang lebih besar harus dipecah.`}
                 onFileSelect={handleFileSelect}
               />
               {!isMockEnabled() && (

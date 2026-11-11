@@ -50,7 +50,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <SidebarRoleCard roleLabel={rombelName ? `Wali Kelas ${rombelName}` : "Wali Kelas"} />
 
         <nav className="mt-6 flex-1 space-y-1.5 px-3 pb-6">
-          {NAV_ITEMS.filter((item) => isNavGroup(item) || !item.requiresMock || isMockEnabled()).map((item) =>
+          {NAV_ITEMS.filter((item) => !item.requiresMock || isMockEnabled()).map((item) =>
             isNavGroup(item) ? (
               <SidebarGroup key={item.label} item={item} pathname={pathname} onNavigate={onClose} />
             ) : (

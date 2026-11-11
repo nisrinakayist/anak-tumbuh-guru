@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import FeatureUnavailable from "@/components/ui/Placeholder/FeatureUnavailable";
+import { isMockEnabled } from "@/lib/utils/mock";
 import { notFound } from "next/navigation";
 import HabitRecapPage from "@/components/features/habitRecap/HabitRecapPage";
 import { HABIT_RECAP_CONFIG } from "@/lib/constants/habitRecapConfig";
@@ -26,6 +28,10 @@ const Page = async ({ params }: PageProps) => {
   // ada datanya; itu ditangani ComingSoonCard di dalam HabitRecapPage).
   if (!(habitId in HABIT_RECAP_CONFIG)) {
     notFound();
+  }
+
+  if (!isMockEnabled()) {
+    return <FeatureUnavailable title="Rekap Kebiasaan" />;
   }
 
   return <HabitRecapPage habitId={habitId as HabitId} />;

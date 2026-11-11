@@ -22,6 +22,8 @@ export type NavGroupItem = {
   icon: IconType;
   basePath: string;
   children: NavChildItem[];
+  // true = fitur belum punya endpoint backend: hanya tampil di mode data dummy.
+  requiresMock?: boolean;
 };
 
 export type NavItem = NavLinkItem | NavGroupItem;
@@ -46,6 +48,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: FiClipboard,
     basePath: "/dashboard/habit-recap",
     children: habitRecapChildren,
+    // Menunggu endpoint rekap backend (INTEG-REKAP-001).
+    requiresMock: true,
   },
   { label: "Report Center", href: "/dashboard/report", icon: CiFileOn, requiresMock: true },
   { label: "Pengaturan Panduan", href: "/dashboard/guide", icon: CiEdit, requiresMock: true },

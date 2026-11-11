@@ -11,6 +11,12 @@ type StudentCredentialTableProps = {
   onResetPassword: (credential: StudentCredential) => void;
 };
 
+const ACCOUNT_STATUS = {
+  active: { label: "Aktif", tone: "success" },
+  inactive: { label: "Nonaktif", tone: "muted" },
+  graduated: { label: "Lulus", tone: "warning" },
+} as const;
+
 function StudentCredentialTable({
   credentials,
   selectedIds,
@@ -24,7 +30,7 @@ function StudentCredentialTable({
 
   return (
     <div className="overflow-x-auto rounded-3xl border border-primary-100 bg-white shadow-sm">
-      <table className="w-full min-w-[720px] text-left text-sm">
+      <table className="w-full min-w-[820px] text-left text-sm">
         <thead className="bg-primary-50 text-primary-900/60">
           <tr>
             <th className="w-10 px-5 py-3">
@@ -39,6 +45,7 @@ function StudentCredentialTable({
             <th className="px-5 py-3 font-bold">Siswa</th>
             <th className="px-5 py-3 font-bold">Kelas / Rombel</th>
             <th className="px-5 py-3 font-bold">Tahun Ajaran</th>
+            <th className="px-5 py-3 font-bold">Status Akun</th>
             <th className="px-5 py-3 font-bold">QR (sesi ini)</th>
             <th className="px-5 py-3 font-bold">Aksi</th>
           </tr>
@@ -64,6 +71,12 @@ function StudentCredentialTable({
                 </td>
                 <td className="px-5 py-4 text-primary-900">{credential.class_group_name}</td>
                 <td className="px-5 py-4 text-primary-900">{credential.academic_year}</td>
+                <td className="px-5 py-4">
+                  <StatusBadge
+                    label={ACCOUNT_STATUS[credential.status].label}
+                    tone={ACCOUNT_STATUS[credential.status].tone}
+                  />
+                </td>
                 <td className="px-5 py-4">
                   {isBusy ? (
                     <StatusBadge label="Membuat..." tone="warning" />
