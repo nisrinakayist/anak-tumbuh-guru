@@ -55,13 +55,7 @@ export const loginApi = async (payload: LoginPayload): Promise<ApiResult<AuthSes
     auth: false,
   });
 
-  if (!login.ok) {
-    // Pesan bawaan throttle bahasa Inggris -> ganti pesan ramah.
-    if (login.status === 429) {
-      login.error.message = "Terlalu banyak percobaan login. Coba lagi dalam beberapa saat.";
-    }
-    return login;
-  }
+  if (!login.ok) return login;
 
   const accessToken = login.data.access_token;
   setToken(accessToken);
