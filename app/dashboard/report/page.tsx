@@ -4,7 +4,7 @@ import { isMockEnabled } from "@/lib/utils/mock";
 import ReportCenter from "@/components/features/report/ReportCenter";
 
 export const metadata: Metadata = {
-  title: "Report Center | ANAKTUMBUH.ID Wali Kelas",
+  title: "Report Center | ANAKHEBAT.ID Wali Kelas",
 };
 
 const Page = () => {

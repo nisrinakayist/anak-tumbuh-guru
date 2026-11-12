@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ANAKTUMBUH.ID | Wali Kelas",
-    short_name: "ANAKTUMBUH",
-    description: "Dashboard Wali Kelas ANAKTUMBUH.ID",
+    name: "ANAKHEBAT.ID | Wali Kelas",
+    short_name: "ANAKHEBAT",
+    description: "Dashboard Wali Kelas ANAKHEBAT.ID",
     start_url: "/",
     scope: "/",
     display: "standalone",

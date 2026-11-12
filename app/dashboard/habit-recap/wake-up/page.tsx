@@ -4,7 +4,7 @@ import { isMockEnabled } from "@/lib/utils/mock";
 import HabitRecapPage from "@/components/features/habitRecap/HabitRecapPage";
 
 export const metadata: Metadata = {
-  title: "Rekap Bangun Pagi | ANAKTUMBUH.ID Wali Kelas",
+  title: "Rekap Bangun Pagi | ANAKHEBAT.ID Wali Kelas",
 };
 
 const Page = () => {

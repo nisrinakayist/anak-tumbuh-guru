@@ -6,7 +6,7 @@ import PwaBootstrap from "@/components/pwa/PwaBootstrap";
 
 
 export const metadata: Metadata = {
-  title: "ANAKTUMBUH.ID | Wali Kelas",
+  title: "ANAKHEBAT.ID | Wali Kelas",
   description: "Sistem Pemantauan 7 Kebiasaan Anak Indonesia Hebat",
 };
 

@@ -1,6 +1,6 @@
 // Pengaturan Panduan: teks panduan pengisian per kebiasaan yang bisa diedit
 // Wali Kelas (rich text), lalu dirender di antarmuka siswa saat mengisi
-// kebiasaan harian. Sesuai "Panduan Pengisian 7 Kebiasaan Anak Tumbuh".
+// kebiasaan harian. Sesuai "Panduan Pengisian 7 Kebiasaan Anak Hebat".
 export type HabitGuide = {
   habit_id: string;
   class_group_id: number;

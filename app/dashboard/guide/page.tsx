@@ -4,7 +4,7 @@ import { isMockEnabled } from "@/lib/utils/mock";
 import HabitGuideEditor from "@/components/features/habitGuide/HabitGuideEditor";
 
 export const metadata: Metadata = {
-  title: "Pengaturan Panduan | ANAKTUMBUH.ID Guru",
+  title: "Pengaturan Panduan | ANAKHEBAT.ID Guru",
 };
 
 const Page = () => {

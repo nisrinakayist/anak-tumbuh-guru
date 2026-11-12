@@ -18,7 +18,7 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { habitId } = await params;
   const config = HABIT_RECAP_CONFIG[habitId as HabitId];
-  return { title: `${config?.label ?? "Rekap Kebiasaan"} | ANAKTUMBUH.ID Wali Kelas` };
+  return { title: `${config?.label ?? "Rekap Kebiasaan"} | ANAKHEBAT.ID Wali Kelas` };
 }
 
 const Page = async ({ params }: PageProps) => {

@@ -9,7 +9,7 @@ export type OfflineRecord = {
   updatedAt: string;
 };
 
-const DB_NAME = "anak-tumbuh-guru-offline";
+const DB_NAME = "anak-hebat-guru-offline";
 const DB_VERSION = 1;
 const STORE_NAME = "offlineQueue";
 

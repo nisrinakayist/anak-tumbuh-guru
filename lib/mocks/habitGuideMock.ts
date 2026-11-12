@@ -1,4 +1,4 @@
-// Konten default diringkas dari "Panduan Pengisian 7 Kebiasaan Anak Tumbuh V2"
+// Konten default diringkas dari "Panduan Pengisian 7 Kebiasaan Anak Hebat V2"
 export const mockHabitGuideContent: Record<string, string> = {
   bangun_cepat: `
     <p><strong>Manfaat:</strong> Memulai hari lebih awal melatih kedisiplinan dan memberimu waktu ekstra untuk bersiap tanpa terburu-buru.</p>

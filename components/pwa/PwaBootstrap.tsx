@@ -46,7 +46,7 @@ export default function PwaBootstrap() {
     if ("caches" in window) {
       caches.keys().then((keys) => {
         keys
-          .filter((key) => key.startsWith("anak-tumbuh-guru-"))
+          .filter((key) => key.startsWith("anak-hebat-guru-"))
           .forEach((key) => caches.delete(key));
       });
     }
