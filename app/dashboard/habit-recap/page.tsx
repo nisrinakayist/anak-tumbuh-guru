@@ -1,6 +1,4 @@
 import { Metadata } from "next";
-import FeatureUnavailable from "@/components/ui/Placeholder/FeatureUnavailable";
-import { isMockEnabled } from "@/lib/utils/mock";
 import HabitRecapOverview from "@/components/features/habitRecap/HabitRecapOverview";
 
 export const metadata: Metadata = {
@@ -8,9 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  if (!isMockEnabled()) {
-    return <FeatureUnavailable title="Rekap Kebiasaan" />;
-  }
-
   return <HabitRecapOverview />;
 }

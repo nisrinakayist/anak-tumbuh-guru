@@ -136,7 +136,7 @@ export async function downloadStudentImportTemplateApi(): Promise<ApiResult<Down
   return apiDownload("/student-imports/template");
 }
 
-// Tahap 1: POST /student-imports/preview (multipart, file .xlsx maksimal 5 MB).
+// Tahap 1: POST /student-imports/preview (multipart, file .xlsx maksimal 4 MB).
 // Hanya validasi format; belum menyimpan apa pun.
 export async function previewStudentImportApi(file: File): Promise<ApiResult<ImportPreviewResult>> {
   if (isMockEnabled()) {

@@ -104,7 +104,7 @@ function ImportStudentWizard({ onClose }: ImportStudentWizardProps) {
             <div className="space-y-3">
               <FileInput
                 accept=".xlsx"
-                description={`Format .xlsx sesuai template (kolom: Nama Lengkap, NISN, Gender), maksimal 5 MB dan ${IMPORT_MAX_ROWS} baris per file. File yang lebih besar harus dipecah.`}
+                description={`Format .xlsx sesuai template (kolom: Nama Lengkap, NISN, Gender), maksimal 4 MB dan ${IMPORT_MAX_ROWS} baris per file. File yang lebih besar harus dipecah.`}
                 onFileSelect={handleFileSelect}
               />
               {!isMockEnabled() && (

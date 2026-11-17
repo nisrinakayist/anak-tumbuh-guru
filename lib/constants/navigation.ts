@@ -48,9 +48,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: FiClipboard,
     basePath: "/dashboard/habit-recap",
     children: habitRecapChildren,
-    // Menunggu endpoint rekap backend (INTEG-REKAP-001).
-    requiresMock: true,
   },
   { label: "Report Center", href: "/dashboard/report", icon: CiFileOn, requiresMock: true },
-  { label: "Pengaturan Panduan", href: "/dashboard/guide", icon: CiEdit, requiresMock: true },
+  { label: "Pengaturan Panduan", href: "/dashboard/guide", icon: CiEdit },
 ];

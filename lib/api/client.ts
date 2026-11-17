@@ -65,6 +65,8 @@ const defaultMessage = (status: number): string => {
       return "Data tidak ditemukan.";
     case 409:
       return "Data bertentangan dengan kondisi saat ini.";
+    case 413:
+      return "Berkas terlalu besar. Maksimal 4 MB.";
     case 422:
       return "Data yang dikirim tidak valid.";
     case 429:
@@ -72,6 +74,26 @@ const defaultMessage = (status: number): string => {
     default:
       return "Terjadi kesalahan pada server.";
   }
+};
+
+// Cold start server uji bisa 4-6 detik (kadang lebih): batas waktu minimal
+// 15 detik, dipakai 20 detik.
+export const REQUEST_TIMEOUT_MS = 20_000;
+
+// Gabungkan signal pemanggil (opsional) dengan batas waktu.
+const withTimeout = (signal?: AbortSignal) => {
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+  signal?.addEventListener("abort", () => controller.abort(), { once: true });
+  return {
+    signal: controller.signal,
+    didTimeOut: () => timedOut,
+    done: () => clearTimeout(timer),
+  };
 };
 
 const redirectToLogin = () => {
@@ -117,15 +139,24 @@ export async function apiRequest<T = unknown>(
   }
 
   let response: Response;
+  const guard = withTimeout(signal);
   try {
+    // Tanpa cookie: autentikasi hanya lewat header Authorization (jangan pakai
+    // credentials: "include").
     response = await fetch(`${getApiBaseUrl()}${path}${buildQuery(query)}`, {
       method,
       headers,
       body: requestBody,
-      signal,
+      signal: guard.signal,
     });
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    guard.done();
+    if (error instanceof DOMException && error.name === "AbortError") {
+      if (guard.didTimeOut()) {
+        return failure(0, "request_timeout", "Server belum merespons. Coba lagi sebentar lagi.");
+      }
+      throw error;
+    }
     return failure(
       0,
       "network_error",
@@ -133,6 +164,7 @@ export async function apiRequest<T = unknown>(
     );
   }
 
+  guard.done();
   let payload: unknown = null;
   const text = await response.text();
   if (text) {
