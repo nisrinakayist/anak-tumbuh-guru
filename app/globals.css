@@ -92,3 +92,17 @@ body {
   }
 }
 
+/* Cetak QR Siswa: ukuran kertas dan margin. Tidak mengatur apa pun di layar. */
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
+/* Modal QR dirender lewat portal di <body> dengan class .qr-print-root
+   (components/features/students/QrPrintModal.tsx). Saat mencetak, semua elemen
+   lain di <body> disembunyikan sehingga yang tercetak hanya kartu QR. */
+@media print {
+  body > *:not(.qr-print-root) {
+    display: none !important;
+  }
+}

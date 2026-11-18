@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import QRCode from "qrcode";
 import JSZip from "jszip";
 import { CiViewList, CiExport } from "react-icons/ci";
@@ -77,8 +78,13 @@ function QrPrintModal({ items: credentials, onClose }: QrPrintModalProps) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+  // Modal dirender lewat portal langsung di <body> (class qr-print-root) supaya saat
+  // dicetak, semua elemen halaman lain bisa disembunyikan lewat app/globals.css dan
+  // yang tercetak hanya kartu QR.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="qr-print-root fixed inset-0 z-50 flex items-center justify-center bg-primary-900/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
       <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl print:max-h-none print:max-w-none print:rounded-none print:shadow-none">
         <div className="flex flex-col gap-3 border-b border-primary-50 px-5 py-4 print:hidden sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -126,7 +132,7 @@ function QrPrintModal({ items: credentials, onClose }: QrPrintModalProps) {
           />
         </div>
 
-        <div className="grid flex-1 grid-cols-2 gap-4 overflow-y-auto p-5 sm:grid-cols-3 print:grid-cols-3 print:overflow-visible print:p-6">
+        <div className="grid flex-1 grid-cols-2 gap-4 overflow-y-auto p-5 sm:grid-cols-3 print:grid-cols-3 print:overflow-visible print:p-0">
           {filteredCredentials.map((credential) => (
             <QrCard
               key={credential.student_id}
@@ -143,7 +149,8 @@ function QrPrintModal({ items: credentials, onClose }: QrPrintModalProps) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

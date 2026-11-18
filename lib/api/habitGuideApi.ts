@@ -1,81 +1,82 @@
-import { HabitGuideResponse, SaveHabitGuidePayload, SaveHabitGuideResponse } from "@/lib/types/habitGuideType";
-import { isMockEnabled, mockDelay } from "@/lib/utils/mock";
+import { apiRequest } from "@/lib/api/client";
 import { mockHabitGuideContent } from "@/lib/mocks/habitGuideMock";
+import { ApiResult } from "@/lib/types/apiType";
+import { HabitGuideMap } from "@/lib/types/habitGuideType";
+import { isMockEnabled, mockDelay } from "@/lib/utils/mock";
 
-// Ambil teks panduan pengisian untuk 1 kebiasaan di rombel Guru yang login
-export async function getHabitGuideApi(
-  habitId: string,
-  classGroupId: number
-): Promise<HabitGuideResponse> {
-  if (isMockEnabled()) {
-    await mockDelay();
-    return {
-      code: 200,
-      status: "success",
-      message: "OK (data dummy)",
-      data: {
-        habit_id: habitId,
-        class_group_id: classGroupId,
-        content_html: mockHabitGuideContent[habitId] ?? "<p></p>",
-        updated_at: new Date().toISOString(),
-      },
-    };
-  }
+type ApiHabit = { id: number; code: string };
+type ApiGuide = { habit_id: number; content: string };
 
-  try {
-    const params = new URLSearchParams({
-      habit_id: habitId,
-      class_group_id: String(classGroupId),
-    });
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/teacher/habit-guide?${params.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
+// Kode kebiasaan di backend "makan_sehat_bergizi"; di FE "makan_sehat".
+const toFrontendCode = (code: string) => (code === "makan_sehat_bergizi" ? "makan_sehat" : code);
+
+let habitIdByCode: Promise<ApiResult<Record<string, number>>> | null = null;
+
+// GET /habits (katalog 7 kebiasaan, semua role). Di-cache selama halaman terbuka.
+async function getHabitIdByCode(): Promise<ApiResult<Record<string, number>>> {
+  if (!habitIdByCode) {
+    habitIdByCode = apiRequest<ApiHabit[]>("/habits").then((res) => {
+      if (!res.ok) {
+        habitIdByCode = null;
+        return res;
       }
-    );
-    return await res.json();
-  } catch (error) {
-    console.log(error);
-    throw error;
+      const map: Record<string, number> = {};
+      (res.data ?? []).forEach((habit) => {
+        map[toFrontendCode(habit.code)] = habit.id;
+      });
+      return { ok: true, status: res.status, data: map } as ApiResult<Record<string, number>>;
+    });
   }
+  return habitIdByCode;
 }
 
-// Simpan (PUT) teks panduan pengisian yang sudah diedit Wali Kelas
-export async function saveHabitGuideApi(
-  payload: SaveHabitGuidePayload
-): Promise<SaveHabitGuideResponse> {
+// Panduan seluruh kebiasaan di rombel Guru (hanya yang sudah ada).
+export async function getHabitGuidesApi(rombelId: number): Promise<ApiResult<HabitGuideMap>> {
   if (isMockEnabled()) {
     await mockDelay();
+    return { ok: true, status: 200, data: { ...mockHabitGuideContent } };
+  }
+
+  const [habits, guides] = await Promise.all([
+    getHabitIdByCode(),
+    apiRequest<ApiGuide[]>(`/rombels/${rombelId}/habit-guides`),
+  ]);
+  if (!habits.ok) return habits;
+  if (!guides.ok) return guides;
+
+  const codeById = new Map(Object.entries(habits.data).map(([code, id]) => [id, code]));
+  const result: HabitGuideMap = {};
+  (guides.data ?? []).forEach((guide) => {
+    const code = codeById.get(guide.habit_id);
+    if (code) result[code] = guide.content;
+  });
+  return { ok: true, status: 200, data: result };
+}
+
+// Simpan panduan satu kebiasaan. Teks kosong = hapus panduan (tetap 200).
+export async function saveHabitGuideApi(
+  rombelId: number,
+  habitCode: string,
+  content: string
+): Promise<ApiResult<{ content: string | null }>> {
+  if (isMockEnabled()) {
+    await mockDelay();
+    return { ok: true, status: 200, data: { content: content.trim() || null } };
+  }
+
+  const habits = await getHabitIdByCode();
+  if (!habits.ok) return habits;
+  const habitId = habits.data[habitCode];
+  if (!habitId) {
     return {
-      code: 200,
-      status: "success",
-      message: "Panduan berhasil disimpan (data dummy)",
-      data: {
-        habit_id: payload.habit_id,
-        class_group_id: payload.class_group_id,
-        content_html: payload.content_html,
-        updated_at: new Date().toISOString(),
-      },
+      ok: false,
+      status: 404,
+      error: { code: "not_found", message: "Kebiasaan tidak ditemukan.", details: [] },
     };
   }
 
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/teacher/habit-guide`, {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    return await res.json();
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
+  return apiRequest<{ content: string | null }>(`/rombels/${rombelId}/habit-guides/${habitId}`, {
+    method: "PATCH",
+    body: { content },
+  });
 }

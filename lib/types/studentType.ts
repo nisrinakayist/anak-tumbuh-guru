@@ -13,6 +13,8 @@ export type Student = {
   name: string;
   nis: string;
   gender: "L" | "P";
+  // URL foto terproteksi dari backend (null = belum ada foto).
+  photo?: string | null;
   status: StudentStatus;
   points: number;
   level: number;
@@ -26,6 +28,8 @@ export type AddStudentPayload = {
   name: string;
   nis: string;
   gender: "L" | "P";
+  // Opsional. Bila ada, dikirim multipart dan tidak bisa masuk antrean offline.
+  photo?: File | null;
 };
 
 // Payload yang dikirim ke POST /students (dan disimpan di antrean offline).

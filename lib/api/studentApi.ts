@@ -87,6 +87,34 @@ export async function addStudentApi(payload: AddStudentPayload): Promise<AddStud
   }
 
   const request = toCreateRequest(payload, rombel.data);
+
+  // Dengan foto: multipart/form-data. Foto tidak disimpan di antrean offline,
+  // jadi bila koneksi putus pengguna diminta mencoba lagi (aman diulang:
+  // bila penyimpanan gagal, backend tidak menyimpan data apa pun).
+  if (payload.photo) {
+    const form = new FormData();
+    form.append("rombel_id", String(rombel.data));
+    form.append("name", request.name);
+    form.append("nisn", request.nisn);
+    form.append("gender", request.gender);
+    form.append("photo", payload.photo);
+    const withPhoto = await apiRequest<ApiStudent>("/students", { method: "POST", body: form });
+    if (withPhoto.ok) {
+      return {
+        kind: "saved",
+        message: `${withPhoto.data.fullname} berhasil ditambahkan`,
+        student: mapApiStudent(withPhoto.data),
+      };
+    }
+    return {
+      kind: "failed",
+      message:
+        withPhoto.status === 0 || withPhoto.status >= 500
+          ? "Gagal menyimpan, coba lagi. Data belum tersimpan."
+          : withPhoto.error.message,
+    };
+  }
+
   const res = await apiRequest<ApiStudent>("/students", { method: "POST", body: { ...request } });
 
   if (res.ok) {
@@ -101,6 +129,18 @@ export async function addStudentApi(payload: AddStudentPayload): Promise<AddStud
   if (res.status === 0) return queueAddStudentOffline(request, UNREACHABLE_MESSAGE);
 
   return { kind: "failed", message: res.error.message };
+}
+
+// Ganti foto siswa: POST /students/{id} dengan _method=PATCH (multipart).
+export async function updateStudentPhotoApi(id: number, photo: File): Promise<ApiResult<ApiStudent>> {
+  if (isMockEnabled()) {
+    await mockDelay();
+    return { ok: true, status: 200, data: undefined as unknown as ApiStudent };
+  }
+  const form = new FormData();
+  form.append("_method", "PATCH");
+  form.append("photo", photo);
+  return apiRequest<ApiStudent>(`/students/${id}`, { method: "POST", body: form });
 }
 
 // Kirim ulang 1 record antrean offline. Mendukung payload baru
@@ -136,7 +176,7 @@ export async function downloadStudentImportTemplateApi(): Promise<ApiResult<Down
   return apiDownload("/student-imports/template");
 }
 
-// Tahap 1: POST /student-imports/preview (multipart, file .xlsx maksimal 5 MB).
+// Tahap 1: POST /student-imports/preview (multipart, file .xlsx maksimal 4 MB).
 // Hanya validasi format; belum menyimpan apa pun.
 export async function previewStudentImportApi(file: File): Promise<ApiResult<ImportPreviewResult>> {
   if (isMockEnabled()) {

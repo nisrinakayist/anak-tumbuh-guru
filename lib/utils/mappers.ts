@@ -36,6 +36,7 @@ export const mapApiStudent = (
   name: api.fullname,
   nis: api.nisn,
   gender: genderFromApi(api.gender),
+  photo: api.photo,
   status: api.status,
   points: api.poin ?? 0,
   level: extra.level ?? 1,

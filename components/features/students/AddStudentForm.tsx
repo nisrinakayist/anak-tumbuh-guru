@@ -7,6 +7,7 @@ import { addStudent, resetAddStudentStatus } from "@/redux/features/students/stu
 import { fetchClassroomDashboard } from "@/redux/features/classroom/classroomSlice";
 import TextInput from "@/components/ui/Input/TextInput";
 import SelectInput from "@/components/ui/Input/SelectInput";
+import PhotoInput from "@/components/ui/Input/PhotoInput";
 import PrimaryButton from "@/components/ui/Button/PrimaryButton";
 import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
 
@@ -21,6 +22,9 @@ function AddStudentForm({ onSuccess }: AddStudentFormProps) {
   const [name, setName] = useState("");
   const [nis, setNis] = useState("");
   const [gender, setGender] = useState<"L" | "P">("L");
+  const [photo, setPhoto] = useState<File | null>(null);
+  // Mengganti key memaksa PhotoInput kosong lagi setelah form direset.
+  const [photoKey, setPhotoKey] = useState(0);
 
   const dispatch = useDispatch<AppDispatch>();
   const { addLoading, addError, addSuccessMessage, addOfflineMessage } = useSelector(
@@ -31,7 +35,7 @@ function AddStudentForm({ onSuccess }: AddStudentFormProps) {
     event.preventDefault();
     dispatch(resetAddStudentStatus());
 
-    const result = await dispatch(addStudent({ name, nis, gender }));
+    const result = await dispatch(addStudent({ name, nis, gender, photo }));
 
     if (addStudent.fulfilled.match(result)) {
       if (result.payload.kind === "saved") {
@@ -39,6 +43,8 @@ function AddStudentForm({ onSuccess }: AddStudentFormProps) {
         setName("");
         setNis("");
         setGender("L");
+        setPhoto(null);
+        setPhotoKey((key) => key + 1);
         dispatch(fetchClassroomDashboard());
         onSuccess?.();
       } else if (result.payload.kind === "queued") {
@@ -84,6 +90,8 @@ function AddStudentForm({ onSuccess }: AddStudentFormProps) {
           { label: "Perempuan", value: "P" },
         ]}
       />
+
+      <PhotoInput key={photoKey} onChange={setPhoto} />
 
       {addError && <ErrorAlert message={addError} onClose={() => dispatch(resetAddStudentStatus())} />}
       {addSuccessMessage && (

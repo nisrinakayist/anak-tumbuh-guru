@@ -1,5 +1,5 @@
 // Konten default diringkas dari "Panduan Pengisian 7 Kebiasaan Anak Hebat V2"
-export const mockHabitGuideContent: Record<string, string> = {
+const RAW: Record<string, string> = {
   bangun_cepat: `
     <p><strong>Manfaat:</strong> Memulai hari lebih awal melatih kedisiplinan dan memberimu waktu ekstra untuk bersiap tanpa terburu-buru.</p>
     <p><strong>Cara Mengisi Waktu Bangun:</strong></p>
@@ -106,3 +106,19 @@ export const mockHabitGuideContent: Record<string, string> = {
     </ul>
   `,
 };
+
+const stripHtml = (html: string) =>
+  html
+    .replace(/<\/(p|h4|li)>/g, "\n")
+    .replace(/<li>/g, "- ")
+    .replace(/<[^>]+>/g, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+// Panduan backend berupa teks polos, jadi dummy-nya juga dibuat teks polos.
+export const mockHabitGuideContent: Record<string, string> = Object.fromEntries(
+  Object.entries(RAW).map(([key, value]) => [key, stripHtml(value)])
+);

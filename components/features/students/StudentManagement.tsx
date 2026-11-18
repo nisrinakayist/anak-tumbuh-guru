@@ -9,11 +9,14 @@ import AddStudentModal from "@/components/features/students/AddStudentModal";
 import ImportStudentWizard from "@/components/features/students/ImportStudentWizard";
 import StudentTable from "@/components/features/dashboard/StudentTable";
 import StudentListMobile from "@/components/features/dashboard/StudentListMobile";
+import ChangePhotoModal from "@/components/features/students/ChangePhotoModal";
+import { Student } from "@/lib/types/studentType";
 import SpinLoader from "@/components/ui/Loader/SpinLoader";
 
 function StudentManagement() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [photoTarget, setPhotoTarget] = useState<Student | null>(null);
   const { students, loading } = useClassroomDashboard();
 
   return (
@@ -58,8 +61,8 @@ function StudentManagement() {
             </div>
           ) : (
             <>
-              <StudentTable students={students} />
-              <StudentListMobile students={students} />
+              <StudentTable students={students} onChangePhoto={setPhotoTarget} />
+              <StudentListMobile students={students} onChangePhoto={setPhotoTarget} />
             </>
           )}
         </div>
@@ -79,6 +82,7 @@ function StudentManagement() {
 
       {isImportOpen && <ImportStudentWizard onClose={() => setIsImportOpen(false)} />}
       {isAddOpen && <AddStudentModal onClose={() => setIsAddOpen(false)} />}
+      {photoTarget && <ChangePhotoModal student={photoTarget} onClose={() => setPhotoTarget(null)} />}
     </div>
   );
 }

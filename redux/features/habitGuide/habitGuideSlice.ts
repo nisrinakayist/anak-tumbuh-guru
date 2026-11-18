@@ -1,9 +1,9 @@
-import { getHabitGuideApi, saveHabitGuideApi } from "@/lib/api/habitGuideApi";
-import { SaveHabitGuidePayload } from "@/lib/types/habitGuideType";
+import { getHabitGuidesApi, saveHabitGuideApi } from "@/lib/api/habitGuideApi";
+import { HabitGuideMap } from "@/lib/types/habitGuideType";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 interface HabitGuideState {
-  contentHtml: string;
+  guides: HabitGuideMap;
   loading: boolean;
   saving: boolean;
   error: string | null;
@@ -11,28 +11,29 @@ interface HabitGuideState {
 }
 
 const initialState: HabitGuideState = {
-  contentHtml: "",
+  guides: {},
   loading: false,
   saving: false,
   error: null,
   saveMessage: null,
 };
 
-export const fetchHabitGuide = createAsyncThunk(
+export const fetchHabitGuides = createAsyncThunk<HabitGuideMap, number, { rejectValue: string }>(
   "habitGuide/fetch",
-  async ({ habitId, classGroupId }: { habitId: string; classGroupId: number }) => {
-    const response = await getHabitGuideApi(habitId, classGroupId);
-    return response;
+  async (rombelId, { rejectWithValue }) => {
+    const res = await getHabitGuidesApi(rombelId);
+    return res.ok ? res.data : rejectWithValue(res.error.message);
   }
 );
 
-export const saveHabitGuide = createAsyncThunk(
-  "habitGuide/save",
-  async (payload: SaveHabitGuidePayload) => {
-    const response = await saveHabitGuideApi(payload);
-    return response;
-  }
-);
+export const saveHabitGuide = createAsyncThunk<
+  { habitCode: string; content: string },
+  { rombelId: number; habitCode: string; content: string },
+  { rejectValue: string }
+>("habitGuide/save", async ({ rombelId, habitCode, content }, { rejectWithValue }) => {
+  const res = await saveHabitGuideApi(rombelId, habitCode, content);
+  return res.ok ? { habitCode, content: res.data?.content ?? "" } : rejectWithValue(res.error.message);
+});
 
 const habitGuideSlice = createSlice({
   name: "habitGuide",
@@ -40,39 +41,39 @@ const habitGuideSlice = createSlice({
   reducers: {
     clearSaveMessage: (state) => {
       state.saveMessage = null;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchHabitGuide.pending, (state) => {
+      .addCase(fetchHabitGuides.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.saveMessage = null;
       })
-      .addCase(fetchHabitGuide.fulfilled, (state, action) => {
+      .addCase(fetchHabitGuides.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.code === 200 && action.payload.data) {
-          state.contentHtml = action.payload.data.content_html;
-        } else {
-          state.error = action.payload.message || "Gagal memuat panduan";
-        }
+        state.guides = action.payload;
       })
-      .addCase(fetchHabitGuide.rejected, (state, action) => {
+      .addCase(fetchHabitGuides.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Gagal memuat panduan";
+        state.error = action.payload ?? "Gagal memuat panduan.";
       })
-
       .addCase(saveHabitGuide.pending, (state) => {
         state.saving = true;
+        state.error = null;
+        state.saveMessage = null;
       })
       .addCase(saveHabitGuide.fulfilled, (state, action) => {
         state.saving = false;
-        if (action.payload.code === 200) {
-          state.saveMessage = action.payload.message;
-        }
+        const { habitCode, content } = action.payload;
+        if (content) state.guides[habitCode] = content;
+        else delete state.guides[habitCode];
+        state.saveMessage = content ? "Panduan berhasil disimpan." : "Panduan dihapus.";
       })
-      .addCase(saveHabitGuide.rejected, (state) => {
+      .addCase(saveHabitGuide.rejected, (state, action) => {
         state.saving = false;
+        state.error = action.payload ?? "Gagal menyimpan panduan.";
       });
   },
 });

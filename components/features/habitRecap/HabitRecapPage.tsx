@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import useHabitRecap from "@/hook/useHabitRecap";
 import { HABIT_PERIOD_OPTIONS, getHabitConfig } from "@/lib/constants/habitRecapConfig";
-import { HabitId } from "@/lib/types/habitRecapType";
+import { HabitId, HabitStudentRecord } from "@/lib/types/habitRecapType";
+import StudentRecordDetailModal from "@/components/features/habitRecap/StudentRecordDetailModal";
 import { isMockEnabled } from "@/lib/utils/mock";
 import SpinLoader from "@/components/ui/Loader/SpinLoader";
 import ErrorAlert from "@/components/ui/Alert/ErrorAlert";
@@ -23,6 +25,7 @@ type HabitRecapPageProps = {
 // pindah menu di Sidebar (mis. dari "Bangun Pagi" ke "Beribadah").
 export default function HabitRecapPage({ habitId }: HabitRecapPageProps) {
   const config = getHabitConfig(habitId);
+  const [detail, setDetail] = useState<HabitStudentRecord | null>(null);
   const {
     recap,
     loading,
@@ -111,7 +114,18 @@ export default function HabitRecapPage({ habitId }: HabitRecapPageProps) {
         onSortChange={handleSortChange}
         onPageChange={handlePageChange}
         onRemind={handleRemind}
+        onView={setDetail}
       />
+
+      {detail && (
+        <StudentRecordDetailModal
+          student={detail}
+          primaryColumnLabel={config.primaryColumnLabel}
+          methodColumnLabel={config.methodColumnLabel}
+          dateLabel={recap.record_date_label}
+          onClose={() => setDetail(null)}
+        />
+      )}
     </div>
   );
 }

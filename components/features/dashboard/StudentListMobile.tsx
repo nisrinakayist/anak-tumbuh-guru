@@ -1,21 +1,26 @@
 import { Student } from "@/lib/types/studentType";
+import StudentAvatar from "@/components/features/students/StudentAvatar";
 import FillStatusBadge from "@/components/features/dashboard/FillStatusBadge";
 
 type StudentListMobileProps = {
   students: Student[];
+  onChangePhoto?: (student: Student) => void;
 };
 
-function StudentListMobile({ students }: StudentListMobileProps) {
+function StudentListMobile({ students, onChangePhoto }: StudentListMobileProps) {
   return (
     <div className="divide-y divide-primary-50 md:hidden">
       {students.map((student) => (
         <div key={student.id} className="p-4">
           <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="font-extrabold text-primary-900">
-                #{student.class_rank} · {student.name}
-              </p>
-              <p className="mt-1 text-xs text-primary-900/45">NISN {student.nis}</p>
+            <div className="flex items-center gap-3">
+              <StudentAvatar name={student.name} photo={student.photo} />
+              <div>
+                <p className="font-extrabold text-primary-900">
+                  #{student.class_rank} · {student.name}
+                </p>
+                <p className="mt-1 text-xs text-primary-900/45">NISN {student.nis}</p>
+              </div>
             </div>
             <FillStatusBadge status={student.today_status} />
           </div>
@@ -29,6 +34,15 @@ function StudentListMobile({ students }: StudentListMobileProps) {
               <p className="mt-1 font-bold text-primary-900">Lv. {student.level}</p>
             </div>
           </div>
+          {onChangePhoto && (
+            <button
+              type="button"
+              onClick={() => onChangePhoto(student)}
+              className="mt-3 text-xs font-black text-primary-500 hover:underline"
+            >
+              Ganti Foto
+            </button>
+          )}
         </div>
       ))}
 

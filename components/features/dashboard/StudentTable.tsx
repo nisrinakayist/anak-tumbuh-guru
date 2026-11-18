@@ -1,11 +1,14 @@
 import { Student } from "@/lib/types/studentType";
+import StudentAvatar from "@/components/features/students/StudentAvatar";
 import FillStatusBadge from "@/components/features/dashboard/FillStatusBadge";
 
 type StudentTableProps = {
   students: Student[];
+  // Bila diisi, kolom "Foto" dengan tombol ganti foto ditampilkan.
+  onChangePhoto?: (student: Student) => void;
 };
 
-function StudentTable({ students }: StudentTableProps) {
+function StudentTable({ students, onChangePhoto }: StudentTableProps) {
   return (
     <div className="hidden overflow-x-auto md:block">
       <table className="w-full text-sm">
@@ -16,6 +19,7 @@ function StudentTable({ students }: StudentTableProps) {
             <th className="px-5 py-3 text-left font-bold">Status Hari Ini</th>
             <th className="px-5 py-3 text-left font-bold">Poin</th>
             <th className="px-5 py-3 text-left font-bold">Level</th>
+            {onChangePhoto && <th className="px-5 py-3 text-left font-bold">Foto</th>}
           </tr>
         </thead>
         <tbody>
@@ -23,14 +27,30 @@ function StudentTable({ students }: StudentTableProps) {
             <tr key={student.id} className="border-t border-primary-50 hover:bg-primary-50/50">
               <td className="px-5 py-4 font-extrabold text-primary-900">#{student.class_rank}</td>
               <td className="px-5 py-4">
-                <p className="font-extrabold text-primary-900">{student.name}</p>
-                <p className="text-xs text-primary-900/45">NISN {student.nis}</p>
+                <div className="flex items-center gap-3">
+                  <StudentAvatar name={student.name} photo={student.photo} />
+                  <div>
+                    <p className="font-extrabold text-primary-900">{student.name}</p>
+                    <p className="text-xs text-primary-900/45">NISN {student.nis}</p>
+                  </div>
+                </div>
               </td>
               <td className="px-5 py-4">
                 <FillStatusBadge status={student.today_status} />
               </td>
               <td className="px-5 py-4 font-bold text-primary-900">{student.points}</td>
               <td className="px-5 py-4 font-bold text-primary-900">Lv. {student.level}</td>
+              {onChangePhoto && (
+                <td className="px-5 py-4">
+                  <button
+                    type="button"
+                    onClick={() => onChangePhoto(student)}
+                    className="text-xs font-black text-primary-500 hover:underline"
+                  >
+                    Ganti Foto
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
